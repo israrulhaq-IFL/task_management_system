@@ -1,0 +1,45 @@
+2024-10-04T17:10:15.724Z [[32minfo[39m]: MySQL connected...
+2024-10-04T17:10:37.424Z [[32minfo[39m]: GET /error
+2024-10-04T17:10:37.425Z [[31merror[39m]: Error: This is a test error
+2024-10-04T17:10:42.158Z [[32minfo[39m]: GET /error
+2024-10-04T17:10:42.159Z [[31merror[39m]: Error: This is a test error
+2024-10-04T17:10:57.399Z [[32minfo[39m]: DELETE /api/tasks/2
+2024-10-04T17:11:09.809Z [[32minfo[39m]: POST /api/tasks
+2024-10-04T17:11:41.717Z [[32minfo[39m]: GET /error
+2024-10-04T17:11:41.717Z [[31merror[39m]: Error: This is a test error
+2024-10-04T17:11:42.721Z [[32minfo[39m]: GET /error
+2024-10-04T17:11:42.722Z [[31merror[39m]: Error: This is a test error
+2024-10-04T17:11:42.888Z [[32minfo[39m]: GET /error
+2024-10-04T17:11:42.889Z [[31merror[39m]: Error: This is a test error
+2024-10-04T17:11:43.061Z [[32minfo[39m]: GET /error
+2024-10-04T17:11:43.062Z [[31merror[39m]: Error: This is a test error
+2024-10-04T17:11:43.277Z [[32minfo[39m]: GET /error
+2024-10-04T17:11:43.277Z [[31merror[39m]: Error: This is a test error
+2024-10-04T17:14:10.411Z [[32minfo[39m]: MySQL connected...
+2024-10-04T17:14:51.592Z [[32minfo[39m]: POST /api/tasks
+2024-10-04T17:26:05.112Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:26:16.151Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:26:16.153Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:26:17.452Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:26:17.455Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:26:20.744Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:26:20.747Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:26:22.325Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:26:22.328Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:26:26.405Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:26:26.408Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:26:28.079Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:26:28.082Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:33:22.561Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:33:22.565Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:34:06.628Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:34:06.631Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:35:18.169Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:35:18.171Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:35:19.365Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:35:19.367Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:35:20.578Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:35:20.580Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:35:21.676Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:35:21.678Z [[32minfo[39m]: GET /api/tasks
+2024-10-04T17:35:35.895Z [[32minfo[39m]: POST /api/tasks

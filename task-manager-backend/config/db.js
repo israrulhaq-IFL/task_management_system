@@ -1,4 +1,5 @@
 const mysql = require('mysql');
+const logger = require('./logger'); // Import the logger
 
 const db = mysql.createConnection({
   host: 'localhost',
@@ -9,9 +10,11 @@ const db = mysql.createConnection({
 
 db.connect(err => {
   if (err) {
+    logger.error(`MySQL connection error: ${err.message}`); // Log the error
     throw err;
   }
-  console.log('MySQL connected...');
+  logger.info('MySQL connected...'); // Log successful connection
 });
+
 
 module.exports = db;

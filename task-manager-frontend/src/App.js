@@ -3,9 +3,9 @@ import './App.css';
 import axios from 'axios';
 import TaskList from './components/TaskList';
 import TaskForm from './components/TaskForm';
+import Header from './components/Header'; // Import Header
+import Footer from './components/Footer'; // Import Footer
 import { Container, Row, Col, Button } from 'react-bootstrap';
-
-
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
@@ -40,7 +40,6 @@ function App() {
       });
   };
 
-
   const deleteTask = (id) => {
     axios.delete(`${API_BASE_URL}/api/tasks/${id}`)
       .then(() => {
@@ -52,26 +51,28 @@ function App() {
   };
 
   return (
-    <Container>
-      <Row className="justify-content-center mt-5">
-        <Col xs={12} md={8} lg={6}>
-          <div className="text-center">
-            <h1>Task Management Application</h1>
-          </div>
-          <div className="text-center mt-3">
-            {showForm ? (
-              <TaskForm addTask={addTask} />
-            ) : (
-              <Button variant="primary" onClick={() => setShowForm(true)}>Add Task</Button>
-            )}
-          </div>
-          <TaskList tasks={tasks} onDelete={deleteTask} />
-        </Col>
-      </Row>
-    </Container>
+    <div className="App">
+      <Header /> {/* Add Header */}
+      <Container>
+        <Row className="justify-content-center mt-5">
+          <Col xs={12} md={8} lg={6}>
+            <div className="text-center">
+              <h1>Task Management Application</h1>
+            </div>
+            <div className="text-center mt-3">
+              {showForm ? (
+                <TaskForm addTask={addTask} />
+              ) : (
+                <Button variant="primary" onClick={() => setShowForm(true)}>Add Task</Button>
+              )}
+            </div>
+            <TaskList tasks={tasks} onDelete={deleteTask} />
+          </Col>
+        </Row>
+      </Container>
+      <Footer /> {/* Add Footer */}
+    </div>
   );
 }
-
-
 
 export default App;
