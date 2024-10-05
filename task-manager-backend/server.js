@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const taskRoutes = require('./routes/taskRoutes');
+const authRoutes = require('./routes/authRoutes'); // Import auth routes
 const logger = require('./config/logger'); // Import the logger
 
 const app = express();
@@ -16,7 +17,11 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/api', taskRoutes);
+// Use auth routes
+app.use('/api/auth', authRoutes);
+
+// Use task routes
+app.use('/api/tasks', taskRoutes);
 
 app.get('/', (req, res) => {
   res.send('Task Manager API');
