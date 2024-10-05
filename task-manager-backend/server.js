@@ -4,8 +4,6 @@ const cors = require('cors');
 const taskRoutes = require('./routes/taskRoutes');
 const logger = require('./config/logger'); // Import the logger
 
-
-
 const app = express();
 const port = 3001;
 
@@ -18,14 +16,11 @@ app.use((req, res, next) => {
   next();
 });
 
-
 app.use('/api', taskRoutes);
 
 app.get('/', (req, res) => {
   res.send('Task Manager API');
 });
-
-
 
 // Error handling middleware to log errors
 app.use((err, req, res, next) => {

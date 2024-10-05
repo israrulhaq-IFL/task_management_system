@@ -8,7 +8,7 @@ import ManagerDashboard from './pages/ManagerDashboard';
 import TeamMemberDashboard from './pages/TeamMemberDashboard';
 import { Container, Row, Col } from 'react-bootstrap';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000'; // Ensure a default value is set
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
 function App() {
   const [tasks, setTasks] = useState([]);
@@ -47,7 +47,8 @@ function App() {
       });
   };
 
-  const updateTaskStatus = (id, status) => {
+  const updateTaskStatus = (id, event) => {
+    const status = event.target.value;
     axios.put(`${API_BASE_URL}/api/tasks/${id}`, { status })
       .then(response => {
         setTasks(tasks.map(task => task.id === id ? { ...task, status: response.data.status } : task));
@@ -63,9 +64,6 @@ function App() {
         <Container>
           <Row className="justify-content-center mt-5">
             <Col xs={12} md={10} lg={8}>
-              <div className="text-center mb-4">
-                <h1>Task Management Application</h1>
-              </div>
               <Routes>
                 <Route path="/dashboard/head" element={<HeadOfDepartmentDashboard tasks={tasks} onDelete={deleteTask} addTask={addTask} />} />
                 <Route path="/dashboard/manager" element={<ManagerDashboard tasks={tasks} onDelete={deleteTask} updateStatus={updateTaskStatus} addTask={addTask} />} />

@@ -5,3 +5,5 @@
 2024-10-04T17:11:42.889Z [[31merror[39m]: Error: This is a test error
 2024-10-04T17:11:43.062Z [[31merror[39m]: Error: This is a test error
 2024-10-04T17:11:43.277Z [[31merror[39m]: Error: This is a test error
+2024-10-05T09:50:29.927Z [[31merror[39m]: MySQL connection error: ER_ACCESS_DENIED_ERROR: Access denied for user ''@'localhost' (using password: NO)
+2024-10-05T09:52:24.627Z [[31merror[39m]: MySQL connection error: ER_ACCESS_DENIED_ERROR: Access denied for user ''@'localhost' (using password: NO)

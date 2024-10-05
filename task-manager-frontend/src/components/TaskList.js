@@ -1,8 +1,15 @@
-// src/components/TaskList.js
 import React from 'react';
 import { Table, Button, Form } from 'react-bootstrap';
 
 const TaskList = ({ tasks, onDelete, onStatusChange }) => {
+  const handleDelete = async (taskId) => {
+    try {
+      await onDelete(taskId);
+    } catch (error) {
+      console.error('There was an error deleting the task!', error);
+    }
+  };
+
   return (
     <Table striped bordered hover>
       <thead>
@@ -16,7 +23,7 @@ const TaskList = ({ tasks, onDelete, onStatusChange }) => {
       </thead>
       <tbody>
         {tasks.map(task => (
-          <tr key={task.id}>
+          <tr key={task.id}> {/* Ensure a unique key prop */}
             <td>{task.id}</td>
             <td>{task.title}</td>
             <td>{task.description}</td>
@@ -28,7 +35,7 @@ const TaskList = ({ tasks, onDelete, onStatusChange }) => {
               </Form.Control>
             </td>
             <td>
-              <Button variant="danger" onClick={() => onDelete(task.id)}>Delete</Button>
+              <Button variant="danger" onClick={() => handleDelete(task.id)}>Delete</Button>
             </td>
           </tr>
         ))}
