@@ -235,3 +235,12 @@
 2024-10-05T12:23:16.817Z [[32minfo[39m]: GET /api/tasks
 2024-10-05T12:23:20.002Z [[32minfo[39m]: GET /api/tasks
 2024-10-05T12:23:20.015Z [[32minfo[39m]: GET /api/tasks
+2024-10-05T12:59:04.622Z [[31merror[39m]: MySQL connection error: ER_ACCESS_DENIED_ERROR: Access denied for user ''@'localhost' (using password: NO)
+2024-10-05T13:00:04.597Z [[31merror[39m]: MySQL connection error: ER_ACCESS_DENIED_ERROR: Access denied for user ''@'localhost' (using password: NO)
+2024-10-05T13:04:14.833Z [[31merror[39m]: MySQL connection error: ER_ACCESS_DENIED_ERROR: Access denied for user ''@'localhost' (using password: NO)
+2024-10-05T13:09:52.508Z [[32minfo[39m]: MySQL connected...
+2024-10-05T13:10:22.338Z [[32minfo[39m]: POST /api/auth/register
+2024-10-05T13:10:30.945Z [[32minfo[39m]: POST /api/auth/login
+2024-10-05T13:10:31.096Z [[32minfo[39m]: GET /api/tasks
+2024-10-05T13:47:43.650Z [[32minfo[39m]: POST /api/auth/login
+2024-10-05T13:47:43.814Z [[32minfo[39m]: GET /api/tasks
