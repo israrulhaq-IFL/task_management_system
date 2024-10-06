@@ -18,23 +18,23 @@ const Footer = () => {
             <p>Email: support@taskmanagement.com</p>
             <p>Phone: +123 456 7890</p>
           </div>
-            <div className="col-md-4 mb-3 mb-md-0">
-              <a href="#" className="text-white me-2">
-                <FontAwesomeIcon icon={faFacebookF} />
-              </a>
-              <a href="#" className="text-white me-2">
-                <FontAwesomeIcon icon={faTwitter} />
-              </a>
-              <a href="#" className="text-white">
-                <FontAwesomeIcon icon={faLinkedinIn} />
-              </a>
-            </div>
+          <div className="col-md-4 mb-3 mb-md-0">
+            <a href="#" className="text-white me-2">
+              <FontAwesomeIcon icon={faFacebookF} />
+            </a>
+            <a href="#" className="text-white me-2">
+              <FontAwesomeIcon icon={faTwitter} />
+            </a>
+            <a href="#" className="text-white">
+              <FontAwesomeIcon icon={faLinkedinIn} />
+            </a>
           </div>
-          <hr className="bg-white" />
-          <p className="mb-0">&copy; 2023 Task Management System. All rights reserved.</p>
         </div>
-      </footer>
-    );
-  };
+        <hr className="bg-white" />
+        <p className="mb-0">&copy; 2023 Task Management System. All rights reserved.</p>
+      </div>
+    </footer>
+  );
+};
 
 export default Footer;

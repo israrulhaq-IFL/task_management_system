@@ -1,8 +1,11 @@
+require('dotenv').config(); // Add this line at the top of your server.js
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const taskRoutes = require('./routes/taskRoutes');
-const authRoutes = require('./routes/authRoutes'); // Import auth routes
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes'); // Import user routes
 const logger = require('./config/logger'); // Import the logger
 
 const app = express();
@@ -22,6 +25,9 @@ app.use('/api/auth', authRoutes);
 
 // Use task routes
 app.use('/api/tasks', taskRoutes);
+
+// Use user routes
+app.use('/api/users', userRoutes);
 
 app.get('/', (req, res) => {
   res.send('Task Manager API');

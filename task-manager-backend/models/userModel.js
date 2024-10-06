@@ -3,17 +3,18 @@ const bcrypt = require('bcryptjs');
 
 const User = {
   create: (userData, callback) => {
-    bcrypt.hash(userData.password, 10, (err, hash) => {
+    const sql = 'INSERT INTO users SET ?';
+    db.query(sql, userData, callback);
+  },
+  getById: (id, callback) => {
+    const query = 'SELECT * FROM users WHERE user_id = ?';
+    db.query(query, [id], (err, results) => {
       if (err) return callback(err);
-      userData.password = hash;
-      const sql = 'INSERT INTO users SET ?';
-      db.query(sql, userData, callback);
+      callback(null, results[0]);
     });
   },
-  getById: (userId, callback) => {
-    const sql = 'SELECT * FROM users WHERE user_id = ?';
-    db.query(sql, [userId], callback);
-  },
+
+  
   getByEmail: (email, callback) => {
     const sql = 'SELECT * FROM users WHERE email = ?';
     db.query(sql, [email], (err, results) => {
@@ -22,8 +23,13 @@ const User = {
     });
   },
   getAll: (callback) => {
-    const sql = 'SELECT * FROM users';
-    db.query(sql, callback);
+    const query = 'SELECT * FROM users';
+    db.query(query, (err, results) => {
+      if (err) {
+        return callback(err, null);
+      }
+      return callback(null, results);
+    });
   },
   update: (userId, userData, callback) => {
     if (userData.password) {

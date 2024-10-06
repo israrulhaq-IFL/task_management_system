@@ -13,7 +13,17 @@ const LoginForm = ({ onLogin, onForgotPassword }) => {
         e.preventDefault();
         try {
             const response = await axios.post('http://localhost:3001/api/auth/login', { email, password });
-            onLogin(response.data.token);
+            
+            // Store the token in localStorage
+            localStorage.setItem('apiKey', response.data.apiKey);
+
+            // Call the onLogin function if provided
+            if (onLogin) {
+                onLogin(response.data.apiKey);
+            }
+
+            // Redirect to the dashboard or another page
+            navigate('/dashboard');
         } catch (error) {
             console.error('There was an error logging in!', error);
         }

@@ -1,0 +1,27 @@
+.super-admin-dashboard {
+  padding: 20px;
+}
+
+.super-admin-dashboard h1 {
+  margin-bottom: 20px;
+}
+
+.super-admin-dashboard table {
+  margin-top: 20px;
+}
+
+.super-admin-dashboard form {
+  margin-top: 20px;
+}
+
+.super-admin-dashboard form h2 {
+  margin-bottom: 20px;
+}
+
+.super-admin-dashboard form .form-group {
+  margin-bottom: 15px;
+}
+
+.super-admin-dashboard form .btn {
+  margin-right: 10px;
+}

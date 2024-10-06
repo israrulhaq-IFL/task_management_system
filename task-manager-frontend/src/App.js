@@ -1,75 +1,71 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import axios from 'axios';
-import { Route, Routes, Navigate } from 'react-router-dom'; // Removed BrowserRouter and Router
+import { Route, Routes, Navigate, useNavigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import HeadOfDepartmentDashboard from './pages/HeadOfDepartmentDashboard';
 import ManagerDashboard from './pages/ManagerDashboard';
 import TeamMemberDashboard from './pages/TeamMemberDashboard';
+import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import LoginForm from './components/LoginForm';
-import RegisterForm from './components/RegisterForm'; // Import RegisterForm
+import RegisterForm from './components/RegisterForm';
 import { Container, Row, Col } from 'react-bootstrap';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
 function App() {
-  const [tasks, setTasks] = useState([]);
   const [token, setToken] = useState(localStorage.getItem('token') || '');
+  const [user, setUser] = useState({ role: '', department: '', subDepartment: '' });
+  const navigate = useNavigate();
 
-  const fetchTasks = useCallback(() => {
-    axios.get(`${API_BASE_URL}/api/tasks`, {
+  const fetchUserInfo = useCallback(() => {
+    if (!token) {
+      console.error('No token found in localStorage');
+      return;
+    }
+
+    axios.get(`${API_BASE_URL}/api/users/me`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(response => {
-        setTasks(response.data);
+        const userData = response.data; // User data is directly available
+        console.log('User data:', userData); // Log the user data
+        setUser(userData);
       })
       .catch(error => {
-        console.error('There was an error fetching the tasks!', error);
+        console.error('There was an error fetching the user info!', error);
+        if (error.response) {
+          console.error('Error response:', error.response.data);
+        }
+      });
+  }, [token]);
+
+  const fetchUsers = useCallback(() => {
+    if (!token) {
+      console.error('No token found in localStorage');
+      return;
+    }
+
+    axios.get(`${API_BASE_URL}/api/users`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(response => {
+        console.log('Users data:', response.data); // Log the users data
+      })
+      .catch(error => {
+        console.error('There was an error fetching the users!', error);
+        if (error.response) {
+          console.error('Error response:', error.response.data);
+        }
       });
   }, [token]);
 
   useEffect(() => {
     if (token) {
-      fetchTasks();
+      fetchUserInfo();
+      fetchUsers(); // Fetch users when the token is available
     }
-  }, [token, fetchTasks]);
-
-  const addTask = (task) => {
-    axios.post(`${API_BASE_URL}/api/tasks`, task, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(response => {
-        setTasks([...tasks, response.data]);
-      })
-      .catch(error => {
-        console.error('There was an error adding the task!', error);
-      });
-  };
-
-  const deleteTask = (id) => {
-    axios.delete(`${API_BASE_URL}/api/tasks/${id}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(() => {
-        setTasks(tasks.filter(task => task.id !== id));
-      })
-      .catch(error => {
-        console.error('There was an error deleting the task!', error);
-      });
-  };
-
-  const updateTaskStatus = (id, event) => {
-    const status = event.target.value;
-    axios.put(`${API_BASE_URL}/api/tasks/${id}`, { status }, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(response => {
-        setTasks(tasks.map(task => task.id === id ? { ...task, status: response.data.status } : task));
-      })
-      .catch(error => {
-        console.error('There was an error updating the task status!', error);
-      });
-  };
+  }, [token, fetchUserInfo, fetchUsers]);
 
   const handleLogin = (token) => {
     setToken(token);
@@ -77,12 +73,48 @@ function App() {
   };
 
   const handleLogout = () => {
-    setToken('');
-    localStorage.removeItem('token');
+    if (!token) {
+      console.error('No token found for logout');
+      return;
+    }
+
+    console.log('Logging out with token:', token); // Log the token
+
+    axios.post(`${API_BASE_URL}/api/auth/logout`, {}, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(() => {
+        setToken('');
+        localStorage.removeItem('token');
+        setUser({ role: '', department: '', subDepartment: '' });
+        console.log('Logged out successfully');
+        navigate('/login'); // Redirect to login page after logout
+      })
+      .catch(error => {
+        console.error('There was an error logging out!', error);
+        if (error.response) {
+          console.error('Error response:', error.response.data);
+        }
+      });
   };
 
   const handleRegisterSuccess = (message) => {
     alert(message);
+  };
+
+  const renderDashboard = () => {
+    switch (user.role) {
+      case 'Team Member':
+        return <TeamMemberDashboard />;
+      case 'Manager':
+        return <ManagerDashboard />;
+      case 'HOD':
+        return <HeadOfDepartmentDashboard />;
+      case 'Super Admin':
+        return <SuperAdminDashboard />;
+      default:
+        return null;
+    }
   };
 
   return (
@@ -91,22 +123,27 @@ function App() {
         <Row className="justify-content-center mt-5">
           <Col xs={12} md={10} lg={8}>
             {token ? (
-              <button onClick={handleLogout}>Logout</button>
-            ) : (
               <>
-                <Routes>
-                  <Route path="/login" element={<LoginForm onLogin={handleLogin} />} />
-                  <Route path="/register" element={<RegisterForm onRegister={handleRegisterSuccess} />} />
-                  <Route path="/" element={<Navigate to="/login" />} />
-                </Routes>
+                <button onClick={handleLogout}>Logout</button>
+                {user.role === 'Super Admin' ? (
+                  renderDashboard()
+                ) : (
+                  user.department && user.subDepartment ? (
+                    renderDashboard()
+                  ) : (
+                    <div>
+                      <p>Please wait until your management assigns you a team.</p>
+                    </div>
+                  )
+                )}
               </>
+            ) : (
+              <Routes>
+                <Route path="/login" element={<LoginForm onLogin={handleLogin} />} />
+                <Route path="/register" element={<RegisterForm onRegister={handleRegisterSuccess} />} />
+                <Route path="/" element={<Navigate to="/login" />} />
+              </Routes>
             )}
-            <Routes>
-              <Route path="/dashboard/head" element={token ? <HeadOfDepartmentDashboard tasks={tasks} onDelete={deleteTask} addTask={addTask} /> : <Navigate to="/" />} />
-              <Route path="/dashboard/manager" element={token ? <ManagerDashboard tasks={tasks} onDelete={deleteTask} updateStatus={updateTaskStatus} addTask={addTask} /> : <Navigate to="/" />} />
-              <Route path="/dashboard/team" element={token ? <TeamMemberDashboard tasks={tasks} onDelete={deleteTask} updateStatus={updateTaskStatus} /> : <Navigate to="/" />} />
-              {/* Add more routes as needed */}
-            </Routes>
           </Col>
         </Row>
       </Container>
