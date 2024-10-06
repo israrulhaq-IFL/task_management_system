@@ -7,6 +7,7 @@ import HeadOfDepartmentDashboard from './pages/HeadOfDepartmentDashboard';
 import ManagerDashboard from './pages/ManagerDashboard';
 import TeamMemberDashboard from './pages/TeamMemberDashboard';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
+import DepartmentManagement from './pages/DepartmentManagement'; // Import the DepartmentManagement page
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
 import { Container, Row, Col } from 'react-bootstrap';
@@ -153,6 +154,9 @@ function App() {
           </Col>
         </Row>
       </Container>
+      <Routes>
+        <Route path="/departments" element={<DepartmentManagement />} /> {/* Add the route for Department Management */}
+      </Routes>
     </Layout>
   );
 }

@@ -5,8 +5,12 @@ import './SuperAdminDashboard.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
+// Define roles statically
+const roles = ['HOD', 'Manager', 'Team Member', 'Super Admin'];
+
 const SuperAdminDashboard = () => {
   const [users, setUsers] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [error, setError] = useState('');
   const [editingUser, setEditingUser] = useState(null);
   const [formData, setFormData] = useState({
@@ -41,9 +45,23 @@ const SuperAdminDashboard = () => {
     }
   }, []);
 
+  const fetchDepartments = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/departments`);
+      setDepartments(response.data);
+    } catch (error) {
+      console.error('There was an error fetching the departments!', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        setError(error.response.data.error);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     fetchUsers();
-  }, [fetchUsers]);
+    fetchDepartments();
+  }, [fetchUsers, fetchDepartments]);
 
   const handleEditClick = (user) => {
     setEditingUser(user.user_id);
@@ -169,11 +187,19 @@ const SuperAdminDashboard = () => {
           </Form.Group>
           <Form.Group controlId="formRole">
             <Form.Label>Role</Form.Label>
-            <Form.Control type="text" name="role" value={formData.role} onChange={handleInputChange} />
+            <Form.Control as="select" name="role" value={formData.role} onChange={handleInputChange}>
+              {roles.map(role => (
+                <option key={role} value={role}>{role}</option>
+              ))}
+            </Form.Control>
           </Form.Group>
           <Form.Group controlId="formDepartment">
             <Form.Label>Department</Form.Label>
-            <Form.Control type="text" name="department" value={formData.department} onChange={handleInputChange} />
+            <Form.Control as="select" name="department" value={formData.department} onChange={handleInputChange}>
+              {departments.map(department => (
+                <option key={department.department_id} value={department.name}>{department.name}</option>
+              ))}
+            </Form.Control>
           </Form.Group>
           <Form.Group controlId="formSubDepartment">
             <Form.Label>Sub-Department</Form.Label>
