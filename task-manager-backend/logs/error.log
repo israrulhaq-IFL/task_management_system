@@ -10,3 +10,19 @@
 2024-10-05T12:59:04.622Z [[31merror[39m]: MySQL connection error: ER_ACCESS_DENIED_ERROR: Access denied for user ''@'localhost' (using password: NO)
 2024-10-05T13:00:04.597Z [[31merror[39m]: MySQL connection error: ER_ACCESS_DENIED_ERROR: Access denied for user ''@'localhost' (using password: NO)
 2024-10-05T13:04:14.833Z [[31merror[39m]: MySQL connection error: ER_ACCESS_DENIED_ERROR: Access denied for user ''@'localhost' (using password: NO)
+2024-10-06T14:33:57.089Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T14:33:58.128Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T14:33:58.606Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T14:33:58.779Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T14:33:58.954Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T14:33:59.122Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T14:33:59.300Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T14:33:59.535Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T14:33:59.755Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T14:34:15.740Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T17:11:26.410Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T17:11:27.128Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T17:11:27.328Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T17:11:27.513Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T17:11:27.726Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T17:21:14.570Z [[31merror[39m]: Error: jwt is not defined
