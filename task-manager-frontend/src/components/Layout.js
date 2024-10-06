@@ -1,15 +1,16 @@
 // src/components/Layout.js
 import React from 'react';
-import Header from './Header';
-import Footer from './Footer';
+import { Container } from 'react-bootstrap';
+import Header from './Header'; // Import Header component
 
-const Layout = ({ children }) => {
+const Layout = ({ children, isLoggedIn, handleLogout }) => {
   return (
-    <div className="App">
-      <Header />
-      <main>{children}</main>
-      <Footer />
-    </div>
+    <>
+      <Header isLoggedIn={isLoggedIn} handleLogout={handleLogout} /> {/* Pass isLoggedIn and handleLogout as props */}
+      <Container>
+        {children}
+      </Container>
+    </>
   );
 };
 

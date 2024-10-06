@@ -4,7 +4,7 @@ import { Navbar, Nav, Container } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const Header = () => {
+const Header = ({ isLoggedIn, handleLogout }) => {
   return (
     <Navbar bg="dark" variant="dark" expand="lg">
       <Container>
@@ -17,7 +17,11 @@ const Header = () => {
             <Nav.Link as={Link} to="/dashboard/head">Head of Department</Nav.Link>
             <Nav.Link as={Link} to="/dashboard/manager">Manager</Nav.Link>
             <Nav.Link as={Link} to="/dashboard/team">Team Member</Nav.Link>
-            <Nav.Link as={Link} to="/logout">Logout</Nav.Link>
+            {isLoggedIn ? (
+              <Nav.Link href="#" onClick={handleLogout}>Logout</Nav.Link>
+            ) : (
+              <Nav.Link as={Link} to="/login">Login</Nav.Link>
+            )}
           </Nav>
         </Navbar.Collapse>
       </Container>

@@ -10,6 +10,7 @@ import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
 import { Container, Row, Col } from 'react-bootstrap';
+import {jwtDecode} from 'jwt-decode';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
@@ -18,9 +19,28 @@ function App() {
   const [user, setUser] = useState({ role: '', department: '', subDepartment: '' });
   const navigate = useNavigate();
 
+  const isTokenExpired = (token) => {
+    try {
+      const decodedToken = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+      return decodedToken.exp < currentTime;
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return true;
+    }
+  };
+
   const fetchUserInfo = useCallback(() => {
     if (!token) {
       console.error('No token found in localStorage');
+      return;
+    }
+
+    if (isTokenExpired(token)) {
+      console.log('Token expired, redirecting to login');
+      setToken('');
+      localStorage.removeItem('token');
+      navigate('/login');
       return;
     }
 
@@ -38,34 +58,13 @@ function App() {
           console.error('Error response:', error.response.data);
         }
       });
-  }, [token]);
-
-  const fetchUsers = useCallback(() => {
-    if (!token) {
-      console.error('No token found in localStorage');
-      return;
-    }
-
-    axios.get(`${API_BASE_URL}/api/users`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(response => {
-        console.log('Users data:', response.data); // Log the users data
-      })
-      .catch(error => {
-        console.error('There was an error fetching the users!', error);
-        if (error.response) {
-          console.error('Error response:', error.response.data);
-        }
-      });
-  }, [token]);
+  }, [token, navigate]);
 
   useEffect(() => {
     if (token) {
       fetchUserInfo();
-      fetchUsers(); // Fetch users when the token is available
     }
-  }, [token, fetchUserInfo, fetchUsers]);
+  }, [token, fetchUserInfo]);
 
   const handleLogin = (token) => {
     setToken(token);
@@ -73,12 +72,11 @@ function App() {
   };
 
   const handleLogout = () => {
+    const token = localStorage.getItem('token');
     if (!token) {
       console.error('No token found for logout');
       return;
     }
-
-    console.log('Logging out with token:', token); // Log the token
 
     axios.post(`${API_BASE_URL}/api/auth/logout`, {}, {
       headers: { Authorization: `Bearer ${token}` }
@@ -86,13 +84,21 @@ function App() {
       .then(() => {
         setToken('');
         localStorage.removeItem('token');
+        localStorage.removeItem('user_id');
         setUser({ role: '', department: '', subDepartment: '' });
         console.log('Logged out successfully');
         navigate('/login'); // Redirect to login page after logout
       })
       .catch(error => {
         console.error('There was an error logging out!', error);
-        if (error.response) {
+        if (error.response && error.response.status === 404) {
+          // If user not found, clear local storage and navigate to login
+          setToken('');
+          localStorage.removeItem('token');
+          localStorage.removeItem('user_id');
+          setUser({ role: '', department: '', subDepartment: '' });
+          navigate('/login');
+        } else if (error.response) {
           console.error('Error response:', error.response.data);
         }
       });
@@ -103,6 +109,7 @@ function App() {
   };
 
   const renderDashboard = () => {
+    console.log('Rendering dashboard for role:', user.role); // Log the user role
     switch (user.role) {
       case 'Team Member':
         return <TeamMemberDashboard />;
@@ -118,13 +125,12 @@ function App() {
   };
 
   return (
-    <Layout>
+    <Layout handleLogout={handleLogout} isLoggedIn={!!token}>
       <Container>
         <Row className="justify-content-center mt-5">
           <Col xs={12} md={10} lg={8}>
             {token ? (
               <>
-                <button onClick={handleLogout}>Logout</button>
                 {user.role === 'Super Admin' ? (
                   renderDashboard()
                 ) : (

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
-import { Table, Button, Form, Container,  Alert } from 'react-bootstrap';
+import { Table, Button, Form, Container, Alert } from 'react-bootstrap';
 import './SuperAdminDashboard.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
@@ -16,35 +16,37 @@ const SuperAdminDashboard = () => {
     department: '',
     subDepartment: ''
   });
+  
+  const loggedInUserId = localStorage.getItem('user_id'); // Assuming user_id is stored in localStorage
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.error('No token found in localStorage');
-        setError('No token found');
-        return;
+  const fetchUsers = useCallback(async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.error('No token found in localStorage');
+      setError('No token found');
+      return;
+    }
+
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/users`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUsers(response.data);
+    } catch (error) {
+      console.error('There was an error fetching the users!', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        setError(error.response.data.error);
       }
-
-      try {
-        const response = await axios.get(`${API_BASE_URL}/api/users`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setUsers(response.data);
-      } catch (error) {
-        console.error('There was an error fetching the users!', error);
-        if (error.response) {
-          console.error('Error response:', error.response.data);
-          setError(error.response.data.error);
-        }
-      }
-    };
-
-    fetchUsers();
+    }
   }, []);
 
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
   const handleEditClick = (user) => {
-    setEditingUser(user.id);
+    setEditingUser(user.user_id);
     setFormData({
       name: user.name,
       email: user.email,
@@ -55,6 +57,15 @@ const SuperAdminDashboard = () => {
   };
 
   const handleDeleteClick = async (userId) => {
+    console.log('Attempting to delete user with ID:', userId);
+    console.log('Logged in user ID:', loggedInUserId);
+
+    if (userId === parseInt(loggedInUserId, 10)) {
+      setError('You cannot delete your own account.');
+      console.error('Attempted to delete own account');
+      return;
+    }
+
     const token = localStorage.getItem('token');
     if (!token) {
       console.error('No token found in localStorage');
@@ -66,7 +77,7 @@ const SuperAdminDashboard = () => {
       await axios.delete(`${API_BASE_URL}/api/users/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setUsers(users.filter(user => user.id !== userId));
+      setUsers(users.filter(user => user.user_id !== userId));
     } catch (error) {
       console.error('There was an error deleting the user!', error);
       if (error.response) {
@@ -94,7 +105,7 @@ const SuperAdminDashboard = () => {
       const response = await axios.put(`${API_BASE_URL}/api/users/${editingUser}`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setUsers(users.map(user => (user.id === editingUser ? response.data : user)));
+      setUsers(users.map(user => (user.user_id === editingUser ? response.data : user)));
       setEditingUser(null);
       setFormData({
         name: '',
@@ -119,6 +130,7 @@ const SuperAdminDashboard = () => {
       <Table striped bordered hover>
         <thead>
           <tr>
+            <th>ID</th>
             <th>Name</th>
             <th>Email</th>
             <th>Role</th>
@@ -129,7 +141,8 @@ const SuperAdminDashboard = () => {
         </thead>
         <tbody>
           {users.map(user => (
-            <tr key={user.id}>
+            <tr key={user.user_id}>
+              <td>{user.user_id}</td>
               <td>{user.name}</td>
               <td>{user.email}</td>
               <td>{user.role}</td>
@@ -137,7 +150,7 @@ const SuperAdminDashboard = () => {
               <td>{user.subDepartment}</td>
               <td>
                 <Button variant="warning" onClick={() => handleEditClick(user)}>Edit</Button>{' '}
-                <Button variant="danger" onClick={() => handleDeleteClick(user.id)}>Delete</Button>
+                <Button variant="danger" onClick={() => handleDeleteClick(user.user_id)}>Delete</Button>
               </td>
             </tr>
           ))}

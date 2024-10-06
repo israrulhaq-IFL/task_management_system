@@ -41,8 +41,17 @@ exports.updateUser = (req, res) => {
 };
 
 exports.deleteUser = (req, res) => {
-  const userId = req.params.id;
-  User.delete(userId, (err, result) => {
+  const userIdToDelete = req.params.id;
+  const token = req.headers.authorization.split(' ')[1];
+  const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+  const loggedInUserId = decodedToken.userId;
+
+  // Check if the logged-in user is trying to delete their own account
+  if (userIdToDelete === loggedInUserId.toString()) {
+    return res.status(403).json({ error: 'You cannot delete your own account.' });
+  }
+
+  User.delete(userIdToDelete, (err, result) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }

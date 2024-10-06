@@ -19,15 +19,15 @@ const Footer = () => {
             <p>Phone: +123 456 7890</p>
           </div>
           <div className="col-md-4 mb-3 mb-md-0">
-            <a href="#" className="text-white me-2">
+            <button onClick={() => window.location.href = 'https://www.facebook.com'} className="text-white me-2" style={{ background: 'none', border: 'none', padding: 0 }}>
               <FontAwesomeIcon icon={faFacebookF} />
-            </a>
-            <a href="#" className="text-white me-2">
+            </button>
+            <button onClick={() => window.location.href = 'https://www.twitter.com'} className="text-white me-2" style={{ background: 'none', border: 'none', padding: 0 }}>
               <FontAwesomeIcon icon={faTwitter} />
-            </a>
-            <a href="#" className="text-white">
+            </button>
+            <button onClick={() => window.location.href = 'https://www.linkedin.com'} className="text-white" style={{ background: 'none', border: 'none', padding: 0 }}>
               <FontAwesomeIcon icon={faLinkedinIn} />
-            </a>
+            </button>
           </div>
         </div>
         <hr className="bg-white" />
