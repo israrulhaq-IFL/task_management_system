@@ -74,16 +74,12 @@ function App() {
   };
 
   const handleLogout = () => {
-  
-  
     const token = localStorage.getItem('token');
     
     if (!token) {
       console.error('No token found for logout');
       return;
     }
-
-
 
     axios.post(`${API_BASE_URL}/api/auth/logout`, {}, {
       headers: { Authorization: `Bearer ${token}` }
@@ -118,7 +114,7 @@ function App() {
     console.log('Rendering dashboard for role:', user.role); // Log the user role
     switch (user.role) {
       case 'Team Member':
-        return <TeamMemberDashboard />;
+        return <TeamMemberDashboard user={user} />; // Pass user to TeamMemberDashboard
       case 'Manager':
         return <ManagerDashboard />;
       case 'HOD':
@@ -160,6 +156,8 @@ function App() {
         </Row>
       </Container>
       <Routes>
+      <Route path="/dashboard" element={renderDashboard()} /> {/* Add the route for Dashboard */}
+
         <Route path="/departments" element={<DepartmentManagement />} /> {/* Add the route for Department Management */}
         <Route path="/sub-departments" element={<SubDepartmentManagement />} /> {/* Add the route for Sub-Department Management */}
       </Routes>

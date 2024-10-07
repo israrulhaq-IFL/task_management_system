@@ -2,12 +2,12 @@ const express = require('express');
 const router = express.Router();
 const taskController = require('../controllers/taskController');
 
-router.post('/tasks', taskController.createTask);
-router.get('/tasks/:id', taskController.getTaskById);
-router.get('/tasks', taskController.getAllTasks);
-router.get('/tasks/department/:departmentId', taskController.getTasksByDepartment);
-router.get('/tasks/sub-department/:subDepartmentId', taskController.getTasksBySubDepartment);
-router.put('/tasks/:id', taskController.updateTask);
-router.delete('/tasks/:id', taskController.deleteTask);
+router.post('/', taskController.createTask);
+router.get('/:id', taskController.getTaskById);
+router.get('/', taskController.getAllTasks);
+router.get('/department/:departmentId', taskController.getTasksByDepartment);
+router.get('/sub-department/:subDepartmentId', taskController.getTasksBySubDepartment);
+router.put('/:id', taskController.updateTask);
+router.delete('/:id', taskController.deleteTask);
 
 module.exports = router;
