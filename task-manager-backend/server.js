@@ -8,7 +8,7 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes'); // Import user routes
 const logger = require('./config/logger'); // Import the logger
 const departmentRoutes = require('./routes/departmentRoutes'); // Import department routes
-
+const subDepartmentRoutes = require('./routes/subDepartmentRoutes'); // Import sub-department routes
 
 const app = express();
 const port = 3001;
@@ -33,6 +33,8 @@ app.use('/api/users', userRoutes);
 
 // department routes
 app.use('/api', departmentRoutes);
+
+app.use('/api', subDepartmentRoutes);
 
 app.get('/', (req, res) => {
   res.send('Task Manager API');

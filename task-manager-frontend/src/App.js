@@ -8,6 +8,7 @@ import ManagerDashboard from './pages/ManagerDashboard';
 import TeamMemberDashboard from './pages/TeamMemberDashboard';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import DepartmentManagement from './pages/DepartmentManagement'; // Import the DepartmentManagement page
+import SubDepartmentManagement from './pages/SubDepartmentManagement'; // Import the SubDepartmentManagement page
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
 import { Container, Row, Col } from 'react-bootstrap';
@@ -73,19 +74,23 @@ function App() {
   };
 
   const handleLogout = () => {
+  
+  
     const token = localStorage.getItem('token');
+    
     if (!token) {
       console.error('No token found for logout');
       return;
     }
+
+
 
     axios.post(`${API_BASE_URL}/api/auth/logout`, {}, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(() => {
         setToken('');
-        localStorage.removeItem('token');
-        localStorage.removeItem('user_id');
+        localStorage.clear();
         setUser({ role: '', department: '', subDepartment: '' });
         console.log('Logged out successfully');
         navigate('/login'); // Redirect to login page after logout
@@ -95,8 +100,7 @@ function App() {
         if (error.response && error.response.status === 404) {
           // If user not found, clear local storage and navigate to login
           setToken('');
-          localStorage.removeItem('token');
-          localStorage.removeItem('user_id');
+          localStorage.clear();
           setUser({ role: '', department: '', subDepartment: '' });
           navigate('/login');
         } else if (error.response) {
@@ -107,6 +111,7 @@ function App() {
 
   const handleRegisterSuccess = (message) => {
     alert(message);
+    navigate('/login');
   };
 
   const renderDashboard = () => {
@@ -156,6 +161,7 @@ function App() {
       </Container>
       <Routes>
         <Route path="/departments" element={<DepartmentManagement />} /> {/* Add the route for Department Management */}
+        <Route path="/sub-departments" element={<SubDepartmentManagement />} /> {/* Add the route for Sub-Department Management */}
       </Routes>
     </Layout>
   );

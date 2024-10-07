@@ -1,26 +1,26 @@
 const db = require('../config/db'); // Use the db configuration from db.js
 
-const Department = {
-  create: (departmentData, callback) => {
-    const sql = 'INSERT INTO departments SET ?';
-    db.query(sql, departmentData, callback);
+const SubDepartment = {
+  create: (subDepartmentData, callback) => {
+    const sql = 'INSERT INTO sub_departments SET ?';
+    db.query(sql, subDepartmentData, callback);
   },
-  getById: (departmentId, callback) => {
-    const sql = 'SELECT * FROM departments WHERE department_id = ?';
-    db.query(sql, [departmentId], callback);
+  getById: (subDepartmentId, callback) => {
+    const sql = 'SELECT * FROM sub_departments WHERE sub_department_id = ?';
+    db.query(sql, [subDepartmentId], callback);
   },
   getAll: (callback) => {
-    const sql = 'SELECT * FROM departments';
+    const sql = 'SELECT * FROM sub_departments';
     db.query(sql, callback);
   },
-  update: (departmentId, departmentData, callback) => {
-    const sql = 'UPDATE departments SET ? WHERE department_id = ?';
-    db.query(sql, [departmentData, departmentId], callback);
+  update: (subDepartmentId, subDepartmentData, callback) => {
+    const sql = 'UPDATE sub_departments SET ? WHERE sub_department_id = ?';
+    db.query(sql, [subDepartmentData, subDepartmentId], callback);
   },
-  delete: (departmentId, callback) => {
-    const sql = 'DELETE FROM departments WHERE department_id = ?';
-    db.query(sql, [departmentId], callback);
+  delete: (subDepartmentId, callback) => {
+    const sql = 'DELETE FROM sub_departments WHERE sub_department_id = ?';
+    db.query(sql, [subDepartmentId], callback);
   }
 };
 
-module.exports = Department;
+module.exports = SubDepartment;

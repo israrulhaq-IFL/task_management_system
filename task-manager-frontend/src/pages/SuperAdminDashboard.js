@@ -11,6 +11,7 @@ const roles = ['HOD', 'Manager', 'Team Member', 'Super Admin'];
 const SuperAdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [departments, setDepartments] = useState([]);
+  const [subDepartments, setSubDepartments] = useState([]); // State to store sub-departments
   const [error, setError] = useState('');
   const [editingUser, setEditingUser] = useState(null);
   const [formData, setFormData] = useState({
@@ -22,6 +23,7 @@ const SuperAdminDashboard = () => {
   });
   
   const loggedInUserId = localStorage.getItem('user_id'); // Assuming user_id is stored in localStorage
+  const token = localStorage.getItem('token'); // Get the token from local storage
 
   const fetchUsers = useCallback(async () => {
     const token = localStorage.getItem('token');
@@ -47,7 +49,10 @@ const SuperAdminDashboard = () => {
 
   const fetchDepartments = useCallback(async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/departments`);
+      const response = await axios.get(`${API_BASE_URL}/api/departments`, {
+        headers: { Authorization: `Bearer ${token}` }
+      }); // Include the token in the headers
+      console.log('Fetched departments:', response.data); // Debugging log
       setDepartments(response.data);
     } catch (error) {
       console.error('There was an error fetching the departments!', error);
@@ -56,21 +61,39 @@ const SuperAdminDashboard = () => {
         setError(error.response.data.error);
       }
     }
-  }, []);
+  }, [token]);
+
+  const fetchSubDepartments = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/sub-departments`, {
+        headers: { Authorization: `Bearer ${token}` }
+      }); // Include the token in the headers
+      console.log('Fetched sub-departments:', response.data); // Debugging log
+      setSubDepartments(response.data);
+    } catch (error) {
+      console.error('There was an error fetching the sub-departments!', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        setError(error.response.data.error);
+      }
+    }
+  }, [token]);
 
   useEffect(() => {
     fetchUsers();
     fetchDepartments();
-  }, [fetchUsers, fetchDepartments]);
+    fetchSubDepartments(); // Fetch sub-departments
+  }, [fetchUsers, fetchDepartments, fetchSubDepartments, token]);
 
+ 
   const handleEditClick = (user) => {
     setEditingUser(user.user_id);
     setFormData({
       name: user.name,
       email: user.email,
       role: user.role,
-      department: user.department,
-      subDepartment: user.subDepartment
+      department: user.department_id,
+      subDepartment: user.sub_department_id
     });
   };
 
@@ -129,8 +152,8 @@ const SuperAdminDashboard = () => {
         name: '',
         email: '',
         role: '',
-        department: '',
-        subDepartment: ''
+        department_id: '',
+        sub_department_id: ''
       });
     } catch (error) {
       console.error('There was an error updating the user!', error);
@@ -164,8 +187,8 @@ const SuperAdminDashboard = () => {
               <td>{user.name}</td>
               <td>{user.email}</td>
               <td>{user.role}</td>
-              <td>{user.department}</td>
-              <td>{user.subDepartment}</td>
+              <td>{departments.find(dept => dept.department_id === user.department_id)?.department_name || 'Unknown'}</td>
+              <td>{subDepartments.find(subDept => subDept.sub_department_id === user.sub_department_id)?.sub_department_name || 'Unknown'}</td>
               <td>
                 <Button variant="warning" onClick={() => handleEditClick(user)}>Edit</Button>{' '}
                 <Button variant="danger" onClick={() => handleDeleteClick(user.user_id)}>Delete</Button>
@@ -195,15 +218,21 @@ const SuperAdminDashboard = () => {
           </Form.Group>
           <Form.Group controlId="formDepartment">
             <Form.Label>Department</Form.Label>
-            <Form.Control as="select" name="department" value={formData.department} onChange={handleInputChange}>
+            <Form.Control as="select" name="department_id" value={formData.department_id} onChange={handleInputChange}>
+              <option value="">Select Department</option>
               {departments.map(department => (
-                <option key={department.department_id} value={department.name}>{department.name}</option>
+                <option key={department.department_id} value={department.department_id}>{department.department_name}</option>
               ))}
             </Form.Control>
           </Form.Group>
           <Form.Group controlId="formSubDepartment">
             <Form.Label>Sub-Department</Form.Label>
-            <Form.Control type="text" name="subDepartment" value={formData.subDepartment} onChange={handleInputChange} />
+            <Form.Control as="select" name="sub_department_id" value={formData.sub_department_id} onChange={handleInputChange}>
+              <option value="">Select Sub-Department</option>
+              {subDepartments.map(subDepartment => (
+                <option key={subDepartment.sub_department_id} value={subDepartment.sub_department_id}>{subDepartment.sub_department_name}</option>
+              ))}
+            </Form.Control>
           </Form.Group>
           <Button variant="primary" type="submit" className="mr-2">Update User</Button>
           <Button variant="secondary" onClick={() => setEditingUser(null)}>Cancel</Button>

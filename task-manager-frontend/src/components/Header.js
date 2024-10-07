@@ -21,7 +21,10 @@ const Header = ({ isLoggedIn, handleLogout }) => {
             <Nav.Link as={Link} to="/dashboard/manager">Manager</Nav.Link>
             <Nav.Link as={Link} to="/dashboard/team">Team Member</Nav.Link>
             {role === 'Super Admin' && (
-              <Nav.Link as={Link} to="/departments">Departments</Nav.Link>
+              <>
+              <Nav.Link as={Link} to="/departments">Department Management</Nav.Link>
+              <Nav.Link as={Link} to="/sub-departments">Sub-Department Management</Nav.Link>
+            </>
             )}
             {isLoggedIn ? (
               <Nav.Link href="#" onClick={handleLogout}>Logout</Nav.Link>

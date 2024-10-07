@@ -20,10 +20,20 @@ exports.getUserById = (req, res) => {
 };
 
 exports.getAllUsers = (req, res) => {
+  const role = req.query.role;
+
   User.getAll((err, result) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
+
+    // If a role is specified, filter the results
+    if (role) {
+      const filteredUsers = result.filter(user => user.role === role);
+      return res.status(200).json(filteredUsers);
+    }
+
+    // If no role is specified, return all users
     res.status(200).json(result);
   });
 };
