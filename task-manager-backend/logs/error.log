@@ -1,0 +1,42 @@
+2024-10-04T17:10:37.425Z [[31merror[39m]: Error: This is a test error
+2024-10-04T17:10:42.159Z [[31merror[39m]: Error: This is a test error
+2024-10-04T17:11:41.717Z [[31merror[39m]: Error: This is a test error
+2024-10-04T17:11:42.722Z [[31merror[39m]: Error: This is a test error
+2024-10-04T17:11:42.889Z [[31merror[39m]: Error: This is a test error
+2024-10-04T17:11:43.062Z [[31merror[39m]: Error: This is a test error
+2024-10-04T17:11:43.277Z [[31merror[39m]: Error: This is a test error
+2024-10-05T09:50:29.927Z [[31merror[39m]: MySQL connection error: ER_ACCESS_DENIED_ERROR: Access denied for user ''@'localhost' (using password: NO)
+2024-10-05T09:52:24.627Z [[31merror[39m]: MySQL connection error: ER_ACCESS_DENIED_ERROR: Access denied for user ''@'localhost' (using password: NO)
+2024-10-05T12:59:04.622Z [[31merror[39m]: MySQL connection error: ER_ACCESS_DENIED_ERROR: Access denied for user ''@'localhost' (using password: NO)
+2024-10-05T13:00:04.597Z [[31merror[39m]: MySQL connection error: ER_ACCESS_DENIED_ERROR: Access denied for user ''@'localhost' (using password: NO)
+2024-10-05T13:04:14.833Z [[31merror[39m]: MySQL connection error: ER_ACCESS_DENIED_ERROR: Access denied for user ''@'localhost' (using password: NO)
+2024-10-06T14:33:57.089Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T14:33:58.128Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T14:33:58.606Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T14:33:58.779Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T14:33:58.954Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T14:33:59.122Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T14:33:59.300Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T14:33:59.535Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T14:33:59.755Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T14:34:15.740Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T17:11:26.410Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T17:11:27.128Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T17:11:27.328Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T17:11:27.513Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T17:11:27.726Z [[31merror[39m]: Error: jwt is not defined
+2024-10-06T17:21:14.570Z [[31merror[39m]: Error: jwt is not defined
+2024-10-07T15:22:09.135Z [[31merror[39m]: Error: jwt is not defined
+2024-10-07T15:22:09.916Z [[31merror[39m]: Error: jwt is not defined
+2024-10-07T15:22:10.120Z [[31merror[39m]: Error: jwt is not defined
+2024-10-07T15:22:10.299Z [[31merror[39m]: Error: jwt is not defined
+2024-10-07T15:22:10.488Z [[31merror[39m]: Error: jwt is not defined
+2024-10-07T15:22:10.673Z [[31merror[39m]: Error: jwt is not defined
+2024-10-07T15:22:10.891Z [[31merror[39m]: Error: jwt is not defined
+2024-10-07T17:28:01.803Z [[31merror[39m]: Error: jwt is not defined
+2024-10-07T17:28:02.659Z [[31merror[39m]: Error: jwt is not defined
+2024-10-07T17:28:03.169Z [[31merror[39m]: Error: jwt is not defined
+2024-10-07T17:28:03.374Z [[31merror[39m]: Error: jwt is not defined
+2024-10-07T17:28:03.602Z [[31merror[39m]: Error: jwt is not defined
+2024-10-07T17:28:03.825Z [[31merror[39m]: Error: jwt is not defined
+2024-10-07T17:28:05.318Z [[31merror[39m]: Error: jwt is not defined
