@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Table, Button, Form, Container, Alert } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
@@ -15,8 +14,6 @@ const SubDepartmentManagement = () => {
     manager_id: '',
     department_id: ''
   });
-  const navigate = useNavigate();
-  const role = localStorage.getItem('role'); // Assuming role is stored in localStorage
   const token = localStorage.getItem('token'); // Get the token from local storage
 
   const fetchSubDepartments = useCallback(async () => {
@@ -65,14 +62,10 @@ const SubDepartmentManagement = () => {
   }, [token]);
 
   useEffect(() => {
-    if (role !== 'Super Admin') {
-      navigate('/'); // Redirect to home page if not Super Admin
-    } else {
-      fetchSubDepartments();
-      fetchManagers();
-      fetchDepartments();
-    }
-  }, [role, navigate, fetchSubDepartments, fetchManagers, fetchDepartments]);
+    fetchSubDepartments();
+    fetchManagers();
+    fetchDepartments();
+  }, [fetchSubDepartments, fetchManagers, fetchDepartments]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

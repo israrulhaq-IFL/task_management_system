@@ -13,8 +13,14 @@ import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
 import { Container, Row, Col } from 'react-bootstrap';
 import {jwtDecode} from 'jwt-decode';
+import withRole from './hoc/withRole'; // Import the withRole HOC
+
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
+
+const DepartmentManagementWithRole = withRole(DepartmentManagement, ['Super Admin']);
+const SubDepartmentManagementWithRole = withRole(SubDepartmentManagement, ['Super Admin']);
+
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
@@ -158,9 +164,9 @@ function App() {
       <Routes>
       <Route path="/dashboard" element={renderDashboard()} /> {/* Add the route for Dashboard */}
 
-        <Route path="/departments" element={<DepartmentManagement />} /> {/* Add the route for Department Management */}
-        <Route path="/sub-departments" element={<SubDepartmentManagement />} /> {/* Add the route for Sub-Department Management */}
-      </Routes>
+      <Route path="/departments" element={<DepartmentManagementWithRole />} />
+        <Route path="/sub-departments" element={<SubDepartmentManagementWithRole />} />
+     </Routes>
     </Layout>
   );
 }
