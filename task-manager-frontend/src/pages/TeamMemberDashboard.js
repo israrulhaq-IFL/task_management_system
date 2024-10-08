@@ -35,7 +35,7 @@ const TeamMemberDashboard = ({ user }) => {
       await axios.put(`${API_BASE_URL}/api/tasks/${id}`, { status: newStatus }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
-      setTasks(tasks.map(task => task.task_id === id ? { ...task, status: newStatus } : task));
+      setTasks(tasks.map(task => task.id === id ? { ...task, status: newStatus } : task));
     } catch (error) {
       console.error('There was an error updating the task status!', error);
       if (error.response) {
@@ -50,7 +50,7 @@ const TeamMemberDashboard = ({ user }) => {
       await axios.delete(`${API_BASE_URL}/api/tasks/${id}`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
-      setTasks(tasks.filter(task => task.task_id !== id));
+      setTasks(tasks.filter(task => task.id !== id));
     } catch (error) {
       console.error('There was an error deleting the task!', error);
       if (error.response) {

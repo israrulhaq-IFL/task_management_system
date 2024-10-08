@@ -18,8 +18,8 @@ const SuperAdminDashboard = () => {
     name: '',
     email: '',
     role: '',
-    department: '',
-    subDepartment: ''
+    department_id: '',
+    sub_department_id: ''
   });
   
   const loggedInUserId = localStorage.getItem('user_id'); // Assuming user_id is stored in localStorage
@@ -92,8 +92,8 @@ const SuperAdminDashboard = () => {
       name: user.name,
       email: user.email,
       role: user.role,
-      department: user.department_id,
-      subDepartment: user.sub_department_id
+      department_id: user.department_id,
+      sub_department_id: user.sub_department_id
     });
   };
 
