@@ -17,7 +17,14 @@ const ManagerDashboard = () => {
         const response = await axios.get(`${API_BASE_URL}/api/tasks`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
-        setTasks(response.data);
+        console.log('Fetched tasks:', response.data); // Debugging log
+
+        // Check for unique task_id values
+        const uniqueTasks = response.data.filter((task, index, self) =>
+          index === self.findIndex((t) => t.task_id === task.task_id)
+        );
+
+        setTasks(uniqueTasks);
       } catch (error) {
         console.error('There was an error fetching the tasks!', error);
         if (error.response) {
@@ -67,7 +74,12 @@ const ManagerDashboard = () => {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       console.log('Task added:', response.data); // Debugging log
-      setTasks([...tasks, response.data]);
+
+      // Ensure the new task has a task_id property
+      const newTask = { ...response.data, task_id: response.data.id };
+      delete newTask.id;
+
+      setTasks([...tasks, newTask]);
       setShowForm(false);
     } catch (error) {
       console.error('There was an error adding the task!', error);

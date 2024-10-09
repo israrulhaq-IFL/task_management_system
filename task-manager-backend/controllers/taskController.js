@@ -2,8 +2,13 @@ const Task = require('../models/taskModel');
 const TaskAssignee = require('../models/taskAssignee');
 const TaskSubDepartment = require('../models/taskSubDepartment');
 
+
+
+
 exports.createTask = (req, res) => {
   const { title, description, priority, status, assigned_to, created_by, department_id, sub_department_ids } = req.body;
+
+  console.log('Assigned to:', assigned_to); // Log the assigned_to array
 
   const taskData = {
     title,
@@ -19,29 +24,45 @@ exports.createTask = (req, res) => {
       return res.status(500).json({ error: err.message });
     }
 
-    const taskId = result.insertId;
+    const taskId = result.taskId;
 
-    // Insert into task_assignees
-    if (assigned_to && assigned_to.length > 0) {
-      assigned_to.forEach(userId => {
-        TaskAssignee.create(taskId, userId, (err) => {
-          if (err) return res.status(500).json({ error: err.message });
-        });
+    const assigneePromises = assigned_to && assigned_to.length > 0
+      ? assigned_to.map(user => new Promise((resolve, reject) => {
+          const userId = user.user_id; // Correctly extract user_id
+          console.log('User ID:', userId); // Log the userId
+          TaskAssignee.create(taskId, userId, (err) => {
+            if (err) {
+              console.error(`Error inserting into task_assignees for userId ${userId}:`, err);
+              return reject(err);
+            }
+            resolve();
+          });
+        }))
+      : [];
+
+    const subDepartmentPromises = sub_department_ids && sub_department_ids.length > 0
+      ? sub_department_ids.map(subDepartmentId => new Promise((resolve, reject) => {
+          TaskSubDepartment.create(taskId, subDepartmentId, (err) => {
+            if (err) {
+              console.error(`Error inserting into task_sub_departments for subDepartmentId ${subDepartmentId}:`, err);
+              return reject(err);
+            }
+            resolve();
+          });
+        }))
+      : [];
+
+    Promise.all([...assigneePromises, ...subDepartmentPromises])
+      .then(() => {
+        res.status(201).json({ id: taskId, ...taskData }); // Return the task ID
+      })
+      .catch(err => {
+        res.status(500).json({ error: 'Error inserting into related tables', details: err.message });
       });
-    }
-
-    // Insert into task_sub_departments
-    if (sub_department_ids && sub_department_ids.length > 0) {
-      sub_department_ids.forEach(subDepartmentId => {
-        TaskSubDepartment.create(taskId, subDepartmentId, (err) => {
-          if (err) return res.status(500).json({ error: err.message });
-        });
-      });
-    }
-
-    res.status(201).json({ id: taskId, ...taskData }); // Return the task ID
   });
 };
+
+
 
 exports.getTaskById = (req, res) => {
   const taskId = req.params.id;

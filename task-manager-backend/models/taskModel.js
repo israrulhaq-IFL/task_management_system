@@ -1,32 +1,13 @@
 const db = require('../config/db');
 
 const Task = {
-  create: (taskData, assignees, subDepartments, callback) => {
+  create: (taskData, callback) => {
     const sql = 'INSERT INTO tasks SET ?';
     db.query(sql, taskData, (err, result) => {
       if (err) return callback(err);
 
       const taskId = result.insertId;
-
-      // Insert into task_assignees
-      if (Array.isArray(assignees) && assignees.length > 0) {
-        const assigneeValues = assignees.map(userId => [taskId, userId]);
-        const assigneeSql = 'INSERT INTO task_assignees (task_id, user_id) VALUES ?';
-        db.query(assigneeSql, [assigneeValues], (err) => {
-          if (err) return callback(err);
-        });
-      }
-
-      // Insert into task_sub_departments
-      if (Array.isArray(subDepartments) && subDepartments.length > 0) {
-        const subDepartmentValues = subDepartments.map(subDepartmentId => [taskId, subDepartmentId]);
-        const subDepartmentSql = 'INSERT INTO task_sub_departments (task_id, sub_department_id) VALUES ?';
-        db.query(subDepartmentSql, [subDepartmentValues], (err) => {
-          if (err) return callback(err);
-        });
-      }
-
-      callback(null, result);
+      callback(null, { taskId, ...taskData });
     });
   },
 
