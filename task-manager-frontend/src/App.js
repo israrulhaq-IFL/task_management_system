@@ -9,18 +9,18 @@ import TeamMemberDashboard from './pages/TeamMemberDashboard';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
 import DepartmentManagement from './pages/DepartmentManagement'; // Import the DepartmentManagement page
 import SubDepartmentManagement from './pages/SubDepartmentManagement'; // Import the SubDepartmentManagement page
+import UserManagement from './pages/UserManagement'; // Import the UserManagement page
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
 import { Container, Row, Col } from 'react-bootstrap';
 import {jwtDecode} from 'jwt-decode';
 import withRole from './hoc/withRole'; // Import the withRole HOC
 
-
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
 const DepartmentManagementWithRole = withRole(DepartmentManagement, ['Super Admin']);
 const SubDepartmentManagementWithRole = withRole(SubDepartmentManagement, ['Super Admin']);
-
+const UserManagementWithRole = withRole(UserManagement, ['Super Admin']); // Wrap UserManagement with withRole HOC
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
@@ -74,9 +74,10 @@ function App() {
     }
   }, [token, fetchUserInfo]);
 
-  const handleLogin = (token) => {
+  const handleLogin = (token ) => {
     setToken(token);
     localStorage.setItem('token', token);
+   
   };
 
   const handleLogout = () => {
@@ -140,13 +141,22 @@ function App() {
             {token ? (
               <>
                 {user.role === 'Super Admin' ? (
-                  renderDashboard()
+                  <Routes>
+                    <Route path="/dashboard" element={<SuperAdminDashboard />} />
+                    <Route path="/departments" element={<DepartmentManagementWithRole />} />
+                    <Route path="/sub-departments" element={<SubDepartmentManagementWithRole />} />
+                    <Route path="/user-management" element={<UserManagementWithRole />} />
+                    <Route path="*" element={<Navigate to="/dashboard" />} />
+                  </Routes>
                 ) : (
                   user.department && user.subDepartment ? (
-                    renderDashboard()
+                    <Routes>
+                      <Route path="/dashboard" element={renderDashboard()} />
+                      <Route path="*" element={<Navigate to="/dashboard" />} />
+                    </Routes>
                   ) : (
                     <div>
-                      <p>Please wait until your management assigns you a team.</p>
+                      <p>Please wait until you are assigned to a team.</p>
                     </div>
                   )
                 )}
@@ -161,12 +171,6 @@ function App() {
           </Col>
         </Row>
       </Container>
-      <Routes>
-      <Route path="/dashboard" element={renderDashboard()} /> {/* Add the route for Dashboard */}
-
-      <Route path="/departments" element={<DepartmentManagementWithRole />} />
-        <Route path="/sub-departments" element={<SubDepartmentManagementWithRole />} />
-     </Routes>
     </Layout>
   );
 }

@@ -19,9 +19,10 @@ import { Navigate } from 'react-router-dom';
 
 const withRole = (Component, allowedRoles) => {
   return (props) => {
+  
     const role = localStorage.getItem('role');
     if (!allowedRoles.includes(role)) {
-      return <Navigate to="/unauthorized" />;
+      return <Navigate to="/login" />;
     }
     return <Component {...props} />;
   };

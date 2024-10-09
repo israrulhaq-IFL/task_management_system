@@ -1,5 +1,5 @@
 const User = require('../models/userModel');
-
+const jwt = require('jsonwebtoken');
 
 exports.getUserById = (req, res) => {
   const userId = req.user.user_id; // Use the user ID from the authenticated user
@@ -38,7 +38,6 @@ exports.getAllUsers = (req, res) => {
   });
 };
 
-
 exports.updateUser = (req, res) => {
   const userId = req.params.id;
   const userData = req.body;
@@ -53,18 +52,41 @@ exports.updateUser = (req, res) => {
 exports.deleteUser = (req, res) => {
   const userIdToDelete = req.params.id;
   const token = req.headers.authorization.split(' ')[1];
-  const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-  const loggedInUserId = decodedToken.userId;
+  let decodedToken;
+
+  try {
+    decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+  } catch (err) {
+    console.error('Error decoding token:', err.message);
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+
+  const loggedInUserId = decodedToken.id; // Ensure this matches the token structure
+  const loggedInUserRole = decodedToken.role; // Assuming role is included in the token
+
+  console.log('User ID to delete:', userIdToDelete);
+  console.log('Logged in user ID:', loggedInUserId);
+  console.log('Logged in user role:', loggedInUserRole);
 
   // Check if the logged-in user is trying to delete their own account
   if (userIdToDelete === loggedInUserId.toString()) {
+    console.log('Attempt to delete own account');
     return res.status(403).json({ error: 'You cannot delete your own account.' });
   }
 
-  User.delete(userIdToDelete, (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.status(200).json({ message: 'User deleted successfully' });
-  });
+  // Allow Super Admin to delete other users
+  if (loggedInUserRole === 'Super Admin') {
+    User.delete(userIdToDelete, (err, result) => {
+      if (err) {
+        console.error('Error deleting user:', err.message);
+        return res.status(500).json({ error: err.message });
+      }
+      console.log('User deleted successfully');
+      return res.status(200).json({ message: 'User deleted successfully' });
+    });
+  } else {
+    // For other roles, add additional checks if necessary
+    console.log('Permission denied for user role:', loggedInUserRole);
+    return res.status(403).json({ error: 'You do not have permission to delete this user.' });
+  }
 };

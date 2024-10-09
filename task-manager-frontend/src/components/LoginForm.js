@@ -17,11 +17,13 @@ const LoginForm = ({ onLogin, onForgotPassword }) => {
             // Store the token in localStorage
             localStorage.setItem('apiKey', response.data.apiKey);
 
+
             // Fetch the user's role
             const userResponse = await axios.get('http://localhost:3001/api/users/me', { // Update the endpoint to the correct one
                 headers: { Authorization: `Bearer ${response.data.apiKey}` }
             });
-            localStorage.setItem('role', userResponse.data.role); // Store the role in localStorage
+           localStorage.setItem('role', userResponse.data.role); // Store the role in localStorage
+            localStorage.setItem('user_id', userResponse.data.user_id); // Store the user ID in localStorage
 
             // Call the onLogin function if provided
             if (onLogin) {
