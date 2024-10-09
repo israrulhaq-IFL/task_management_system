@@ -24,7 +24,7 @@ const UserManagementWithRole = withRole(UserManagement, ['Super Admin']); // Wra
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
-  const [user, setUser] = useState({ role: '', department: '', subDepartment: '' });
+  const [user, setUser] = useState({ role: '', department_id: '', sub_department_id: '' });
   const navigate = useNavigate();
 
   const isTokenExpired = (token) => {
@@ -74,10 +74,10 @@ function App() {
     }
   }, [token, fetchUserInfo]);
 
-  const handleLogin = (token ) => {
+  const handleLogin = (token) => {
     setToken(token);
     localStorage.setItem('token', token);
-   
+    fetchUserInfo(); // Fetch user info after login
   };
 
   const handleLogout = () => {
@@ -94,7 +94,7 @@ function App() {
       .then(() => {
         setToken('');
         localStorage.clear();
-        setUser({ role: '', department: '', subDepartment: '' });
+        setUser({ role: '', department_id: '', sub_department_id: '' });
         console.log('Logged out successfully');
         navigate('/login'); // Redirect to login page after logout
       })
@@ -104,7 +104,7 @@ function App() {
           // If user not found, clear local storage and navigate to login
           setToken('');
           localStorage.clear();
-          setUser({ role: '', department: '', subDepartment: '' });
+          setUser({ role: '', department_id: '', sub_department_id: '' });
           navigate('/login');
         } else if (error.response) {
           console.error('Error response:', error.response.data);
@@ -149,7 +149,7 @@ function App() {
                     <Route path="*" element={<Navigate to="/dashboard" />} />
                   </Routes>
                 ) : (
-                  user.department && user.subDepartment ? (
+                  user.department_id && user.sub_department_id ? (
                     <Routes>
                       <Route path="/dashboard" element={renderDashboard()} />
                       <Route path="*" element={<Navigate to="/dashboard" />} />

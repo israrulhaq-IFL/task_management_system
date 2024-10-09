@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { Form, Button } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './AuthForm.css'; // Ensure this path is correct
+import './LoginForm.css'; // Ensure this path is correct
 
 const LoginForm = ({ onLogin, onForgotPassword }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -17,13 +19,12 @@ const LoginForm = ({ onLogin, onForgotPassword }) => {
             // Store the token in localStorage
             localStorage.setItem('apiKey', response.data.apiKey);
 
-
             // Fetch the user's role
-            const userResponse = await axios.get('http://localhost:3001/api/users/me', { // Update the endpoint to the correct one
+            const userResponse = await axios.get('http://localhost:3001/api/users/me', {
                 headers: { Authorization: `Bearer ${response.data.apiKey}` }
             });
-           localStorage.setItem('role', userResponse.data.role); // Store the role in localStorage
-            localStorage.setItem('user_id', userResponse.data.user_id); // Store the user ID in localStorage
+            localStorage.setItem('role', userResponse.data.role);
+            localStorage.setItem('user_id', userResponse.data.user_id);
 
             // Call the onLogin function if provided
             if (onLogin) {
@@ -34,6 +35,7 @@ const LoginForm = ({ onLogin, onForgotPassword }) => {
             navigate('/dashboard');
         } catch (error) {
             console.error('There was an error logging in!', error);
+            setErrorMessage('Your username or password is incorrect.');
         }
     };
 
@@ -41,15 +43,28 @@ const LoginForm = ({ onLogin, onForgotPassword }) => {
         navigate('/register');
     };
 
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+
     return (
         <Form onSubmit={handleSubmit} className="auth-form">
+            {errorMessage && <div className="error-message">{errorMessage}</div>}
             <Form.Group controlId="formEmail">
                 <Form.Label>Email:</Form.Label>
                 <Form.Control type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </Form.Group>
-            <Form.Group controlId="formPassword">
+            <Form.Group controlId="formPassword" className="password-group">
                 <Form.Label>Password:</Form.Label>
-                <Form.Control type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <Form.Control
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                />
+                <span className="eye-icon" onClick={togglePasswordVisibility}>
+                    {showPassword ? '🙈' : '👁️'}
+                </span>
             </Form.Group>
             <Button variant="primary" type="submit">Login</Button>
             <Button variant="link" className="register-btn" onClick={handleRegister}>Register</Button>

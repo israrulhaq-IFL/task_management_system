@@ -74,7 +74,21 @@ const DepartmentManagement = () => {
       const response = await axios.post(`${API_BASE_URL}/api/departments`, formData, {
         headers: { Authorization: `Bearer ${token}` } // Include the token in the headers
       });
-      setDepartments([...departments, response.data]);
+
+      // Check if the response contains the created department data
+      if (response.data.department_id) {
+        // Update the departments state with the new department data
+        setDepartments([...departments, response.data]);
+      } else {
+        // Manually update the department data in the state
+        const newDepartment = {
+          department_id: response.data.departmentId,
+          department_name: formData.department_name,
+          hod_id: formData.hod_id
+        };
+        setDepartments([...departments, newDepartment]);
+      }
+
       setFormData({ department_name: '', hod_id: '' });
     } catch (error) {
       console.error('There was an error creating the department!', error);
@@ -84,6 +98,7 @@ const DepartmentManagement = () => {
       }
     }
   };
+
 
   return (
     <Container className="department-management">

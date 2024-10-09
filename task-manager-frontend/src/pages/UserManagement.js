@@ -26,6 +26,13 @@ const UserManagement = () => {
   const loggedInUserId = localStorage.getItem('user_id'); // Assuming user_id is stored in localStorage
   const token = localStorage.getItem('token'); // Get the token from local storage
 
+  useEffect(() => {
+  
+    return () => {
+   
+    };
+  }, []);
+
   const fetchUsers = useCallback(async () => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -92,28 +99,26 @@ const UserManagement = () => {
       name: user.name,
       email: user.email,
       role: user.role,
-      department_id: user.department_id,
-      sub_department_id: user.sub_department_id
+      department_id: user.department_id || '',
+      sub_department_id: user.sub_department_id || ''
     });
   };
 
   const handleDeleteClick = async (userId) => {
-    console.log('Attempting to delete user with ID:', userId);
-    console.log('Logged in user ID:', loggedInUserId);
-
+   
     if (userId === parseInt(loggedInUserId, 10)) {
       setError('You cannot delete your own account.');
       console.error('Attempted to delete own account');
       return;
     }
-
+  
     const token = localStorage.getItem('token');
     if (!token) {
       console.error('No token found in localStorage');
       setError('No token found');
       return;
     }
-
+  
     try {
       await axios.delete(`${API_BASE_URL}/api/users/${userId}`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -127,7 +132,6 @@ const UserManagement = () => {
       }
     }
   };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -141,12 +145,29 @@ const UserManagement = () => {
       setError('No token found');
       return;
     }
-
+  
+    // Convert empty strings to null for department_id and sub_department_id
+    const updatedFormData = {
+      ...formData,
+      department_id: formData.department_id === '' ? null : formData.department_id,
+      sub_department_id: formData.sub_department_id === '' ? null : formData.sub_department_id
+    };
+  
     try {
-      const response = await axios.put(`${API_BASE_URL}/api/users/${editingUser}`, formData, {
+      const response = await axios.put(`${API_BASE_URL}/api/users/${editingUser}`, updatedFormData, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setUsers(users.map(user => (user.user_id === editingUser ? response.data : user)));
+  
+      // Check if the response contains the updated user data
+      if (response.data.user_id) {
+        // Update the users state with the updated user data
+        setUsers(users.map(user => (user.user_id === editingUser ? response.data : user)));
+      } else {
+        // Manually update the user data in the state
+        setUsers(users.map(user => (user.user_id === editingUser ? { ...user, ...updatedFormData } : user)));
+      }
+  
+      // Clear the editing state and form data
       setEditingUser(null);
       setFormData({
         name: '',
@@ -164,82 +185,87 @@ const UserManagement = () => {
     }
   };
 
-  return (
+
+return (
     <Container className="user-management">
-      <h1 className="text-center my-4">User Management</h1>
-      {error && <Alert variant="danger">{error}</Alert>}
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Department</th>
-            <th>Sub-Department</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map(user => (
-            <tr key={user.user_id}>
-              <td>{user.user_id}</td>
-              <td>{user.name}</td>
-              <td>{user.email}</td>
-              <td>{user.role}</td>
-              <td>{departments.find(dept => dept.department_id === user.department_id)?.department_name || 'Unknown'}</td>
-              <td>{subDepartments.find(subDept => subDept.sub_department_id === user.sub_department_id)?.sub_department_name || 'Unknown'}</td>
-              <td>
-                <Button variant="warning" onClick={() => handleEditClick(user)}>Edit</Button>{' '}
-                <Button variant="danger" onClick={() => handleDeleteClick(user.user_id)}>Delete</Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
-      {editingUser && (
-        <Form onSubmit={handleFormSubmit} className="mt-4">
-          <h2>Edit User</h2>
-          <Form.Group controlId="formName">
-            <Form.Label>Name</Form.Label>
-            <Form.Control type="text" name="name" value={formData.name} onChange={handleInputChange} />
-          </Form.Group>
-          <Form.Group controlId="formEmail">
-            <Form.Label>Email</Form.Label>
-            <Form.Control type="email" name="email" value={formData.email} onChange={handleInputChange} />
-          </Form.Group>
-          <Form.Group controlId="formRole">
-            <Form.Label>Role</Form.Label>
-            <Form.Control as="select" name="role" value={formData.role} onChange={handleInputChange}>
-              {roles.map(role => (
-                <option key={role} value={role}>{role}</option>
-              ))}
-            </Form.Control>
-          </Form.Group>
-          <Form.Group controlId="formDepartment">
-            <Form.Label>Department</Form.Label>
-            <Form.Control as="select" name="department_id" value={formData.department_id} onChange={handleInputChange}>
-              <option value="">Select Department</option>
-              {departments.map(department => (
-                <option key={department.department_id} value={department.department_id}>{department.department_name}</option>
-              ))}
-            </Form.Control>
-          </Form.Group>
-          <Form.Group controlId="formSubDepartment">
-            <Form.Label>Sub-Department</Form.Label>
-            <Form.Control as="select" name="sub_department_id" value={formData.sub_department_id} onChange={handleInputChange}>
-              <option value="">Select Sub-Department</option>
-              {subDepartments.map(subDepartment => (
-                <option key={subDepartment.sub_department_id} value={subDepartment.sub_department_id}>{subDepartment.sub_department_name}</option>
-              ))}
-            </Form.Control>
-          </Form.Group>
-          <Button variant="primary" type="submit" className="mr-2">Update User</Button>
-          <Button variant="secondary" onClick={() => setEditingUser(null)}>Cancel</Button>
-        </Form>
-      )}
+        <h1 className="text-center my-4">User Management</h1>
+        {error && <Alert variant="danger">{error}</Alert>}
+        <Table striped bordered hover>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Department</th>
+                    <th>Sub-Department</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {users
+                    .filter((user, index, self) => user.user_id && self.findIndex(u => u.user_id === user.user_id) === index) // Filter out invalid and duplicate entries
+                    .map(user => {
+                        return (
+                            <tr key={user.user_id}>
+                                <td>{user.user_id}</td>
+                                <td>{user.name}</td>
+                                <td>{user.email}</td>
+                                <td>{user.role}</td>
+                                <td>{departments.find(dept => dept.department_id === user.department_id)?.department_name || 'Unknown'}</td>
+                                <td>{subDepartments.find(subDept => subDept.sub_department_id === user.sub_department_id)?.sub_department_name || 'Unknown'}</td>
+                                <td>
+                                    <Button variant="warning" onClick={() => handleEditClick(user)}>Edit</Button>{' '}
+                                    <Button variant="danger" onClick={() => handleDeleteClick(user.user_id)}>Delete</Button>
+                                </td>
+                            </tr>
+                        );
+                    })}
+            </tbody>
+        </Table>
+        {editingUser && (
+            <Form onSubmit={handleFormSubmit} className="mt-4">
+                <h2>Edit User</h2>
+                <Form.Group controlId="formName">
+                    <Form.Label>Name</Form.Label>
+                    <Form.Control type="text" name="name" value={formData.name} onChange={handleInputChange} />
+                </Form.Group>
+                <Form.Group controlId="formEmail">
+                    <Form.Label>Email</Form.Label>
+                    <Form.Control type="email" name="email" value={formData.email} onChange={handleInputChange} />
+                </Form.Group>
+                <Form.Group controlId="formRole">
+                    <Form.Label>Role</Form.Label>
+                    <Form.Control as="select" name="role" value={formData.role} onChange={handleInputChange}>
+                        {roles.map(role => (
+                            <option key={role} value={role}>{role}</option>
+                        ))}
+                    </Form.Control>
+                </Form.Group>
+                <Form.Group controlId="formDepartment">
+                    <Form.Label>Department</Form.Label>
+                    <Form.Control as="select" name="department_id" value={formData.department_id} onChange={handleInputChange}>
+                        <option value="">Select Department</option>
+                        {departments.map(department => (
+                            <option key={department.department_id} value={department.department_id}>{department.department_name}</option>
+                        ))}
+                    </Form.Control>
+                </Form.Group>
+                <Form.Group controlId="formSubDepartment">
+                    <Form.Label>Sub-Department</Form.Label>
+                    <Form.Control as="select" name="sub_department_id" value={formData.sub_department_id} onChange={handleInputChange}>
+                        <option value="">Select Sub-Department</option>
+                        {subDepartments.map(subDepartment => (
+                            <option key={subDepartment.sub_department_id} value={subDepartment.sub_department_id}>{subDepartment.sub_department_name}</option>
+                        ))}
+                    </Form.Control>
+                </Form.Group>
+                <Button variant="primary" type="submit" className="mr-2">Update User</Button>
+                <Button variant="secondary" onClick={() => setEditingUser(null)}>Cancel</Button>
+            </Form>
+        )}
     </Container>
-  );
+);
 };
 
 export default withRole(UserManagement, ['Super Admin']); // Wrap the component with withRole HOC
