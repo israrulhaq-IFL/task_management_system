@@ -1,5 +1,8 @@
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
+const db = require('../config/db');
+
+
 
 exports.getUserById = (req, res) => {
   const userId = req.user.user_id; // Use the user ID from the authenticated user
@@ -88,5 +91,49 @@ exports.deleteUser = (req, res) => {
     // For other roles, add additional checks if necessary
     console.log('Permission denied for user role:', loggedInUserRole);
     return res.status(403).json({ error: 'You do not have permission to delete this user.' });
+  }
+};
+
+exports.getUsersForManager = async (req, res) => {
+  try {
+    const { manager_id } = req.query;
+    console.log('Fetching users for Manager with manager_id:', manager_id); // Debugging log
+
+    const users = await User.getUsersForManager(manager_id);
+    console.log('Fetched users for Manager:', users); // Debugging log
+
+    res.json({ data: { users } });
+  } catch (error) {
+    console.error('Error fetching users for Manager:', error); // Debugging log
+    res.status(500).json({ error: 'Error fetching users for Manager' });
+  }
+};
+
+exports.getUsersForTeamMember = async (req, res) => {
+  try {
+    const { department_id } = req.query;
+    console.log('Fetching users for Team Member with department_id:', department_id); // Debugging log
+
+    const users = await User.getUsersForTeamMember(department_id);
+    console.log('Fetched users for Team Member:', users); // Debugging log
+
+    res.json({ data: { users } });
+  } catch (error) {
+    console.error('Error fetching users for Team Member:', error); // Debugging log
+    res.status(500).json({ error: 'Error fetching users for Team Member' });
+  }
+};
+
+exports.getUsersForHOD = async (req, res) => {
+  try {
+    console.log('Fetching users for HOD'); // Debugging log
+
+    const users = await User.getUsersForHOD();
+    console.log('Fetched users for HOD:', users); // Debugging log
+
+    res.json({ data: { users } });
+  } catch (error) {
+    console.error('Error fetching users for HOD:', error); // Debugging log
+    res.status(500).json({ error: 'Error fetching users for HOD' });
   }
 };

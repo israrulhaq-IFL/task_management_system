@@ -10,6 +10,7 @@ const ManagerDashboard = () => {
   const [tasks, setTasks] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState('');
+  const [role, setRole] = useState('');
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -35,6 +36,10 @@ const ManagerDashboard = () => {
     };
 
     fetchTasks();
+
+    // Fetch role from local storage or API
+    const userRole = localStorage.getItem('role'); // Assuming role is stored in local storage
+    setRole(userRole);
   }, []);
 
   const handleStatusChange = async (id, newStatus) => {
@@ -103,7 +108,7 @@ const ManagerDashboard = () => {
           <Modal.Title>Add Task</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <TaskForm addTask={addTask} />
+          <TaskForm addTask={addTask} role={role} />
         </Modal.Body>
       </Modal>
     </div>

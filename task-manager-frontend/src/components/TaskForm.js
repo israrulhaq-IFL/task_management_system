@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Button } from 'react-bootstrap';
 import axios from 'axios';
+import PropTypes from 'prop-types';
 
-const TaskForm = ({ addTask }) => {
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
+
+const TaskForm = ({ addTask, role }) => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [status, setStatus] = useState('pending');
     const [priority, setPriority] = useState('medium');
     const [assignedTo, setAssignedTo] = useState([]);
-    const [managers, setManagers] = useState([]);
-    const [teamMembers, setTeamMembers] = useState([]);
+    const [users, setUsers] = useState([]);
     const [user, setUser] = useState(null);
 
     useEffect(() => {
@@ -23,7 +25,7 @@ const TaskForm = ({ addTask }) => {
                             Authorization: `Bearer ${token}`
                         }
                     };
-                    const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/users/${user_id}`, config);
+                    const response = await axios.get(`${API_BASE_URL}/api/users/${user_id}`, config);
                     const userDetails = response.data;
                     console.log('Fetched user details:', userDetails); // Debugging log
                     setUser(userDetails);
@@ -37,29 +39,43 @@ const TaskForm = ({ addTask }) => {
     }, []);
 
     useEffect(() => {
-        if (user && user.department_id) {
+        if (user) {
             const fetchUsers = async () => {
                 try {
-                    console.log('Fetching users for department:', user.department_id); // Debugging log
                     const token = localStorage.getItem('token');
+                    console.log('Token:', token); // Debugging log
                     const config = {
                         headers: {
-                            Authorization: `Bearer ${token}`
+                            Authorization: `Bearer ${token}`,
+                             'Cache-Control': 'no-cache'
                         }
                     };
-                    const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/users?department_id=${user.department_id}`, config);
-                    console.log('Fetched users:', response.data); // Debugging log
-                    setManagers(response.data.managers || []);
-                    setTeamMembers(response.data.teamMembers || []);
+                    let response;
+                    console.log('Role:', role); // Debugging log
+                    if (role === 'Manager') {
+                        response = await axios.get(`${API_BASE_URL}/api/users/manager?manager_id=${user.user_id}`, config);
+                    } else if (role === 'team-member') {
+                        response = await axios.get(`${API_BASE_URL}/api/users/team-member?department_id=${user.department_id}`, config);
+                    } else if (role === 'hod') {
+                        response = await axios.get(`${API_BASE_URL}/api/users/hod`, config);
+                    }
+                    console.log('Fetched users response:', response); // Debugging log
+                    console.log('Response data:', response.data); // Detailed log
+                    if (response && response.data && response.data.users) {
+                        const userIds = response.data.users.map(user => user.user_id);
+                        console.log('User IDs:', userIds); // Debugging log
+                        setUsers(userIds);
+                    } else {
+                        console.error('Unexpected response structure:', response);
+                    }
                 } catch (error) {
                     console.error('Error fetching users:', error);
                 }
             };
-
+    
             fetchUsers();
         }
-    }, [user]);
-
+    }, [user, role]);
     const handleSubmit = (e) => {
         e.preventDefault();
         const created_by = user.user_id;
@@ -134,11 +150,8 @@ const TaskForm = ({ addTask }) => {
                     onChange={handleAssigneeChange}
                 >
                     <option key={user.user_id} value={JSON.stringify(user)}>{user.name} (You)</option>
-                    {managers.map(manager => (
-                        <option key={manager.user_id} value={JSON.stringify(manager)}>{manager.name}</option>
-                    ))}
-                    {teamMembers.map(member => (
-                        <option key={member.user_id} value={JSON.stringify(member)}>{member.name}</option>
+                    {users.map(user => (
+                        <option key={user.user_id} value={JSON.stringify(user)}>{user.name}</option>
                     ))}
                 </Form.Control>
             </Form.Group>
@@ -147,6 +160,11 @@ const TaskForm = ({ addTask }) => {
             </Button>
         </Form>
     );
+};
+
+TaskForm.propTypes = {
+    addTask: PropTypes.func.isRequired,
+    role: PropTypes.string.isRequired
 };
 
 export default TaskForm;

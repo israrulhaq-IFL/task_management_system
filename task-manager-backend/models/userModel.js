@@ -47,6 +47,40 @@ const User = {
   delete: (userId, callback) => {
     const sql = 'DELETE FROM users WHERE user_id = ?';
     db.query(sql, [userId], callback);
+  },
+  getUsersForManager: async (manager_id) => {
+    const query = `
+      SELECT u.user_id
+      FROM users u
+      JOIN sub_departments sd ON u.sub_department_id = sd.sub_department_id
+      WHERE sd.manager_id = ?
+    `;
+    console.log('Executing query:', query); // Debugging log
+    const [users] = await db.query(query, [manager_id]);
+    console.log('Query result:', users); // Debugging log
+    return users;
+  },
+  getUsersForTeamMember: async (department_id) => {
+    const query = `
+      SELECT u.user_id, u.name, u.email, u.role, u.department_id, u.sub_department_id
+      FROM users u
+      WHERE u.department_id = ?
+    `;
+    console.log('Executing query for team member:', query); // Debugging log
+    const [users] = await db.query(query, [department_id]);
+    console.log('Query result for team member:', users); // Debugging log
+    return users;
+  },
+  getUsersForHOD: async () => {
+    const query = `
+      SELECT u.user_id, u.name, u.email, u.role, u.department_id, u.sub_department_id
+      FROM users u
+      WHERE u.role = 'HOD'
+    `;
+    console.log('Executing query for HOD:', query); // Debugging log
+    const [users] = await db.query(query);
+    console.log('Query result for HOD:', users); // Debugging log
+    return users;
   }
 };
 
