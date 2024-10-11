@@ -3,10 +3,10 @@ import React from 'react';
 import { Container } from 'react-bootstrap';
 import Header from './Header'; // Import Header component
 
-const Layout = ({ children, isLoggedIn, handleLogout }) => {
+const Layout = ({ children, isLoggedIn, handleLogout, userRole }) => {
   return (
     <>
-      <Header isLoggedIn={isLoggedIn} handleLogout={handleLogout} /> {/* Pass isLoggedIn and handleLogout as props */}
+      <Header isLoggedIn={isLoggedIn} handleLogout={handleLogout} userRole={userRole} /> {/* Pass isLoggedIn, handleLogout, and userRole as props */}
       <Container>
         {children}
       </Container>

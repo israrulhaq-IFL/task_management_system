@@ -16,19 +16,20 @@ const LoginForm = ({ onLogin, onForgotPassword }) => {
         try {
             const response = await axios.post('http://localhost:3001/api/auth/login', { email, password });
             
-            // Store the token in localStorage
-            localStorage.setItem('apiKey', response.data.apiKey);
+            // Store the tokens in localStorage
+            localStorage.setItem('accessToken', response.data.accessToken);
+            localStorage.setItem('refreshToken', response.data.refreshToken);
 
             // Fetch the user's role
             const userResponse = await axios.get('http://localhost:3001/api/users/me', {
-                headers: { Authorization: `Bearer ${response.data.apiKey}` }
+                headers: { Authorization: `Bearer ${response.data.accessToken}` }
             });
             localStorage.setItem('role', userResponse.data.role);
             localStorage.setItem('user_id', userResponse.data.user_id);
 
             // Call the onLogin function if provided
             if (onLogin) {
-                onLogin(response.data.apiKey);
+                onLogin(response.data.accessToken);
             }
 
             // Redirect to the dashboard or another page

@@ -16,7 +16,7 @@ const TaskForm = ({ addTask, role }) => {
 
     useEffect(() => {
         const user_id = localStorage.getItem('user_id');
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('accessToken');
         if (user_id && token) {
             const fetchUserDetails = async () => {
                 try {
@@ -42,7 +42,7 @@ const TaskForm = ({ addTask, role }) => {
         if (user) {
             const fetchUsers = async () => {
                 try {
-                    const token = localStorage.getItem('token');
+                    const token = localStorage.getItem('accessToken');
                     console.log('Token:', token); // Debugging log
                     const config = {
                         headers: {

@@ -3,9 +3,7 @@ import { Navbar, Nav, Container } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const Header = ({ isLoggedIn, handleLogout }) => {
-  const role = localStorage.getItem('role'); // Assuming role is stored in localStorage
-
+const Header = ({ isLoggedIn, handleLogout, userRole }) => {
   return (
     <Navbar bg="dark" variant="dark" expand="lg">
       <Container>
@@ -16,20 +14,20 @@ const Header = ({ isLoggedIn, handleLogout }) => {
             {isLoggedIn && (
               <>
                 <Nav.Link as={Link} to="/">Home</Nav.Link>
-                {role === 'Super Admin' && (
+                {userRole === 'Super Admin' && (
                   <>
                     <Nav.Link as={Link} to="/departments">Department Management</Nav.Link>
                     <Nav.Link as={Link} to="/sub-departments">Sub-Department Management</Nav.Link>
                     <Nav.Link as={Link} to="/user-management">User Management</Nav.Link>
                   </>
                 )}
-                {role === 'HOD' && (
+                {userRole === 'HOD' && (
                   <Nav.Link as={Link} to="/dashboard">Head of Department Dashboard</Nav.Link>
                 )}
-                {role === 'Manager' && (
+                {userRole === 'Manager' && (
                   <Nav.Link as={Link} to="/dashboard">Manager Dashboard</Nav.Link>
                 )}
-                {role === 'Team Member' && (
+                {userRole === 'Team Member' && (
                   <Nav.Link as={Link} to="/dashboard">Team Member Dashboard</Nav.Link>
                 )}
                 <Nav.Link href="#" onClick={handleLogout}>Logout</Nav.Link>

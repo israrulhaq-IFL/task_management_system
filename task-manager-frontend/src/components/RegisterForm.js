@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { Form, Button } from 'react-bootstrap';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import './AuthForm.css'; // Ensure this path is correct
+import { useNavigate } from 'react-router-dom';
+import './AuthForm.css';
 
 const RegisterForm = ({ onRegister }) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const navigate = useNavigate(); // Initialize useNavigate
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -26,7 +26,7 @@ const RegisterForm = ({ onRegister }) => {
     };
 
     const handleLoginClick = () => {
-        navigate('/login'); // Navigate to the login route
+        navigate('/login');
     };
 
     return (

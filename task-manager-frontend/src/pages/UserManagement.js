@@ -24,7 +24,7 @@ const UserManagement = () => {
   });
 
   const loggedInUserId = localStorage.getItem('user_id'); // Assuming user_id is stored in localStorage
-  const token = localStorage.getItem('token'); // Get the token from local storage
+  const token = localStorage.getItem('accessToken'); // Get the token from local storage
 
   useEffect(() => {
   
@@ -34,7 +34,7 @@ const UserManagement = () => {
   }, []);
 
   const fetchUsers = useCallback(async () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessTokenn');
     if (!token) {
       console.error('No token found in localStorage');
       setError('No token found');
@@ -112,7 +112,7 @@ const UserManagement = () => {
       return;
     }
   
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       console.error('No token found in localStorage');
       setError('No token found');
@@ -139,7 +139,7 @@ const UserManagement = () => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       console.error('No token found in localStorage');
       setError('No token found');

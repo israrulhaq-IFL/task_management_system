@@ -13,7 +13,7 @@ import UserManagement from './pages/UserManagement'; // Import the UserManagemen
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
 import { Container, Row, Col } from 'react-bootstrap';
-import {jwtDecode} from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode'; // Corrected import statement
 import withRole from './hoc/withRole'; // Import the withRole HOC
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
@@ -23,7 +23,7 @@ const SubDepartmentManagementWithRole = withRole(SubDepartmentManagement, ['Supe
 const UserManagementWithRole = withRole(UserManagement, ['Super Admin']); // Wrap UserManagement with withRole HOC
 
 function App() {
-  const [token, setToken] = useState(localStorage.getItem('token') || '');
+  const [token, setToken] = useState(localStorage.getItem('accessToken') || '');
   const [user, setUser] = useState({ role: '', department_id: '', sub_department_id: '' });
   const navigate = useNavigate();
 
@@ -38,6 +38,24 @@ function App() {
     }
   };
 
+  const refreshToken = useCallback(async () => {
+    try {
+      const refreshToken = localStorage.getItem('refreshToken');
+      const response = await axios.post(`${API_BASE_URL}/api/auth/refresh-token`, { token: refreshToken });
+      const { accessToken, refreshToken: newRefreshToken } = response.data;
+      localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('refreshToken', newRefreshToken);
+      setToken(accessToken);
+    } catch (error) {
+      console.error('Error refreshing token:', error);
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user_id');
+      localStorage.removeItem('role');
+      navigate('/login');
+    }
+  }, [navigate]);
+
   const fetchUserInfo = useCallback(() => {
     if (!token) {
       console.error('No token found in localStorage');
@@ -45,10 +63,8 @@ function App() {
     }
 
     if (isTokenExpired(token)) {
-      console.log('Token expired, redirecting to login');
-      setToken('');
-      localStorage.removeItem('token');
-      navigate('/login');
+      console.log('Token expired, refreshing token');
+      refreshToken();
       return;
     }
 
@@ -66,7 +82,7 @@ function App() {
           console.error('Error response:', error.response.data);
         }
       });
-  }, [token, navigate]);
+  }, [token, refreshToken]);
 
   useEffect(() => {
     if (token) {
@@ -74,14 +90,23 @@ function App() {
     }
   }, [token, fetchUserInfo]);
 
-  const handleLogin = (token) => {
-    setToken(token);
-    localStorage.setItem('token', token);
-    fetchUserInfo(); // Fetch user info after login
+  const handleLogin = (accessToken) => {
+    setToken(accessToken);
+    localStorage.setItem('accessToken', accessToken);
+   
+    
   };
 
+
+  useEffect(() => {
+    if (token) {
+      fetchUserInfo();
+    }
+  }, [token, fetchUserInfo]);
+
+
   const handleLogout = () => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('accessToken');
     
     if (!token) {
       console.error('No token found for logout');
@@ -134,7 +159,7 @@ function App() {
   };
 
   return (
-    <Layout handleLogout={handleLogout} isLoggedIn={!!token}>
+    <Layout handleLogout={handleLogout} isLoggedIn={!!token} userRole={user.role}>
       <Container>
         <Row className="justify-content-center mt-5">
           <Col xs={12} md={10} lg={8}>

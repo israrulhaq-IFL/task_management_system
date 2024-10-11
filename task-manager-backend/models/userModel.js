@@ -46,8 +46,15 @@ const User = {
     const sql = 'DELETE FROM users WHERE user_id = ?';
     db.query(sql, [userId], callback);
   },
- 
-
+  saveRefreshToken: (userId, refreshToken) => {
+    const sql = 'UPDATE users SET refresh_token = ? WHERE user_id = ?';
+    return new Promise((resolve, reject) => {
+      db.query(sql, [refreshToken, userId], (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+    });
+  },
 
 getUsersForManager: (managerId, callback) => {
   const query =  `SELECT u.user_id, u.name, u.email, u.role, u.department_id, u.sub_department_id

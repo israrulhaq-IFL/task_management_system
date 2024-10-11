@@ -13,7 +13,7 @@ const DepartmentManagement = () => {
     department_name: '',
     hod_id: ''
   });
-  const token = localStorage.getItem('token'); // Get the token from local storage
+  const token = localStorage.getItem('accessToken'); // Get the token from local storage
 
   const fetchDepartments = useCallback(async () => {
     try {

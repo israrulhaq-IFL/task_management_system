@@ -14,7 +14,7 @@ const SubDepartmentManagement = () => {
     manager_id: '',
     department_id: ''
   });
-  const token = localStorage.getItem('token'); // Get the token from local storage
+  const token = localStorage.getItem('accessToken'); // Get the token from local storage
 
   const fetchSubDepartments = useCallback(async () => {
     try {

@@ -18,6 +18,8 @@ router.post('/login', [
 
 router.post('/logout', authMiddleware, authController.logout); // Ensure authMiddleware is applied
 
+router.post('/refresh-token', authController.refreshToken); // Add refresh token route
+
 router.get('/me', authMiddleware, authController.checkBlacklist, (req, res) => {
   // Protected route logic...
   res.json(req.user); // Example response
