@@ -47,47 +47,46 @@ const User = {
     db.query(sql, [userId], callback);
   },
  
-  getUsersForManager: async (managerId) => {
-    try {
-      const [rows] = await db.query(`
-        SELECT u.user_id
-        FROM users u
-        JOIN sub_departments sd ON u.sub_department_id = sd.sub_department_id
-        WHERE sd.manager_id = ?
-      `, [managerId]);
 
-      if (!rows) {
-        throw new Error('No users found for the given manager');
-      }
 
-      return rows;
-    } catch (error) {
-      console.error('Error fetching users for Manager:', error);
-      throw error;
-    }
-  },
-  getUsersForTeamMember: async (department_id) => {
-    const query = `
-      SELECT u.user_id, u.name, u.email, u.role, u.department_id, u.sub_department_id
-      FROM users u
-      WHERE u.department_id = ?
-    `;
-    console.log('Executing query for team member:', query); // Debugging log
-    const [users] = await db.query(query, [department_id]);
-    console.log('Query result for team member:', users); // Debugging log
-    return users;
-  },
-  getUsersForHOD: async () => {
-    const query = `
-      SELECT u.user_id, u.name, u.email, u.role, u.department_id, u.sub_department_id
-      FROM users u
-      WHERE u.role = 'HOD'
-    `;
-    console.log('Executing query for HOD:', query); // Debugging log
-    const [users] = await db.query(query);
-    console.log('Query result for HOD:', users); // Debugging log
-    return users;
-  }
+getUsersForManager: (managerId, callback) => {
+  const query =  `SELECT u.user_id, u.name, u.email, u.role, u.department_id, u.sub_department_id
+  FROM users u
+  JOIN sub_departments sd ON u.sub_department_id = sd.sub_department_id
+  WHERE sd.manager_id = ?`;
+  db.query(query, [managerId], (err, results) => {
+    if (err) return callback(err);
+    callback(null, results); // Return the full results array
+  });
+},
+getUsersForTeamMember: (department_id, callback) => {
+  const query = `
+    SELECT u.user_id, u.name, u.email, u.role, u.department_id, u.sub_department_id
+    FROM users u
+    WHERE u.department_id = ?
+  `;
+  console.log('Executing query for team member:', query); // Debugging log
+  db.query(query, [department_id], (err, results) => {
+    if (err) return callback(err);
+    console.log('Query result for team member:', results); // Debugging log
+    callback(null, results); // Return the full results array
+  });
+},
+
+getUsersForHOD: (callback) => {
+  const query = `
+    SELECT u.user_id, u.name, u.email, u.role, u.department_id, u.sub_department_id
+    FROM users u
+    WHERE u.role = 'HOD'
+  `;
+  console.log('Executing query for HOD:', query); // Debugging log
+  db.query(query, (err, results) => {
+    if (err) return callback(err);
+    console.log('Query result for HOD:', results); // Debugging log
+    callback(null, results); // Return the full results array
+  });
+}
 };
+
 
 module.exports = User;

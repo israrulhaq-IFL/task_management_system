@@ -39,7 +39,7 @@ exports.register = (req, res) => {
 
 exports.login = (req, res) => {
   const { email, password } = req.body;
-  console.log('Login request received:', { email, password }); // Log the login request
+  //console.log('Login request received:', { email, password }); // Log the login request
 
   User.getByEmail(email, (err, user) => {
     if (err) {
@@ -51,7 +51,7 @@ exports.login = (req, res) => {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    console.log('Stored hashed password:', user.password); // Log the stored hashed password
+   // console.log('Stored hashed password:', user.password); // Log the stored hashed password
 
     bcrypt.compare(password, user.password, (err, isMatch) => {
       if (err) {

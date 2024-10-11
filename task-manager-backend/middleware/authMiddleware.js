@@ -12,7 +12,7 @@ const authMiddleware = async (req, res, next) => {
   const token = authHeader.replace('Bearer ', '');
   console.log('Token:', token); // Log the token
   if (!token) {
-    console.log('Authentication required');
+    //console.log('Authentication required');
     return res.status(401).send({ error: 'Authentication required' });
   }
 
@@ -28,7 +28,7 @@ const authMiddleware = async (req, res, next) => {
         console.log('User not found');
         return res.status(404).send({ error: 'User not found' });
       }
-      console.log('User found:', user); // Log the user
+     // console.log('User found:', user); // Log the user
       req.user = user;
       next();
     });

@@ -93,53 +93,71 @@ exports.deleteUser = (req, res) => {
 };
 
 exports.getUsersForManager = async (req, res) => {
+  const managerId = req.query.manager_id;
+  console.log('Fetching users for Manager with manager_id:', managerId); // Log the manager_id
   try {
-    const managerId = req.user.manager_id; // Ensure manager_id is available in req.user
-
-    console.log('Fetching users for Manager with manager_id:', managerId); // Debugging log
-    if (!managerId) {
-      throw new Error('Manager ID is not available');
-    }
-    console.log(`Fetching users for Manager with manager_id: ${managerId}`);
-
-    const users = await User.getUsersForManager(managerId);
-
-    if (!Array.isArray(users)) {
-      throw new TypeError('Expected an array of users');
-    }
-
-    res.json(users);
+    User.getUsersForManager(managerId, (err, users) => {
+      if (err) {
+        console.error('Error fetching users for Manager:', err.message);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+      if (!Array.isArray(users)) {
+        console.error('Unexpected query result format:', users);
+        return res.status(500).json({ error: 'Unexpected query result format' });
+      }
+      console.log('Fetched users:', users); // Log the fetched users
+      res.json({ users });
+    });
   } catch (error) {
-    console.error('Error fetching users for Manager:', error);
-    res.status(500).json({ error: 'Error fetching users for Manager' });
+    console.error('Error in getUsersForManager:', error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
-exports.getUsersForTeamMember = async (req, res) => {
+exports.getUsersForTeamMember = (req, res) => {
   try {
     const { department_id } = req.query;
+    if (!department_id) {
+      throw new Error('Department ID is not available');
+    }
     console.log('Fetching users for Team Member with department_id:', department_id); // Debugging log
 
-    const users = await User.getUsersForTeamMember(department_id);
-    console.log('Fetched users for Team Member:', users); // Debugging log
-
-    res.json({ data: { users } });
+    User.getUsersForTeamMember(department_id, (err, users) => {
+      if (err) {
+        console.error('Error fetching users for Team Member:', err.message);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+      if (!Array.isArray(users)) {
+        console.error('Unexpected query result format:', users);
+        return res.status(500).json({ error: 'Unexpected query result format' });
+      }
+      console.log('Fetched users for Team Member:', users); // Debugging log
+      res.json({ users });
+    });
   } catch (error) {
-    console.error('Error fetching users for Team Member:', error); // Debugging log
-    res.status(500).json({ error: 'Error fetching users for Team Member' });
+    console.error('Error in getUsersForTeamMember:', error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
-exports.getUsersForHOD = async (req, res) => {
+exports.getUsersForHOD = (req, res) => {
   try {
     console.log('Fetching users for HOD'); // Debugging log
 
-    const users = await User.getUsersForHOD();
-    console.log('Fetched users for HOD:', users); // Debugging log
-
-    res.json({ data: { users } });
+    User.getUsersForHOD((err, users) => {
+      if (err) {
+        console.error('Error fetching users for HOD:', err.message);
+        return res.status(500).json({ error: 'Internal Server Error' });
+      }
+      if (!Array.isArray(users)) {
+        console.error('Unexpected query result format:', users);
+        return res.status(500).json({ error: 'Unexpected query result format' });
+      }
+      console.log('Fetched users for HOD:', users); // Debugging log
+      res.json({ users });
+    });
   } catch (error) {
-    console.error('Error fetching users for HOD:', error); // Debugging log
-    res.status(500).json({ error: 'Error fetching users for HOD' });
+    console.error('Error in getUsersForHOD:', error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };

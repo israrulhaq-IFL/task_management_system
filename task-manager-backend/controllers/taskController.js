@@ -40,8 +40,11 @@ exports.createTask = (req, res) => {
         }))
       : [];
 
-    const subDepartmentPromises = sub_department_ids && sub_department_ids.length > 0
-      ? sub_department_ids.map(subDepartmentId => new Promise((resolve, reject) => {
+    // Use a Set to ensure unique sub_department_ids
+    const uniqueSubDepartmentIds = [...new Set(sub_department_ids)];
+
+    const subDepartmentPromises = uniqueSubDepartmentIds.length > 0
+      ? uniqueSubDepartmentIds.map(subDepartmentId => new Promise((resolve, reject) => {
           TaskSubDepartment.create(taskId, subDepartmentId, (err) => {
             if (err) {
               console.error(`Error inserting into task_sub_departments for subDepartmentId ${subDepartmentId}:`, err);
@@ -61,7 +64,6 @@ exports.createTask = (req, res) => {
       });
   });
 };
-
 
 
 exports.getTaskById = (req, res) => {

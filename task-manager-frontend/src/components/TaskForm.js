@@ -62,9 +62,7 @@ const TaskForm = ({ addTask, role }) => {
                     console.log('Fetched users response:', response); // Debugging log
                     console.log('Response data:', response.data); // Detailed log
                     if (response && response.data && response.data.users) {
-                        const userIds = response.data.users.map(user => user.user_id);
-                        console.log('User IDs:', userIds); // Debugging log
-                        setUsers(userIds);
+                        setUsers(response.data.users);
                     } else {
                         console.error('Unexpected response structure:', response);
                     }
@@ -76,6 +74,7 @@ const TaskForm = ({ addTask, role }) => {
             fetchUsers();
         }
     }, [user, role]);
+
     const handleSubmit = (e) => {
         e.preventDefault();
         const created_by = user.user_id;
