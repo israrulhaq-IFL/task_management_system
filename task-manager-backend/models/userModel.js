@@ -13,8 +13,6 @@ const User = {
       callback(null, results[0]);
     });
   },
-
-  
   getByEmail: (email, callback) => {
     const sql = 'SELECT * FROM users WHERE email = ?';
     db.query(sql, [email], (err, results) => {
@@ -48,17 +46,25 @@ const User = {
     const sql = 'DELETE FROM users WHERE user_id = ?';
     db.query(sql, [userId], callback);
   },
-  getUsersForManager: async (manager_id) => {
-    const query = `
-      SELECT u.user_id
-      FROM users u
-      JOIN sub_departments sd ON u.sub_department_id = sd.sub_department_id
-      WHERE sd.manager_id = ?
-    `;
-    console.log('Executing query:', query); // Debugging log
-    const [users] = await db.query(query, [manager_id]);
-    console.log('Query result:', users); // Debugging log
-    return users;
+ 
+  getUsersForManager: async (managerId) => {
+    try {
+      const [rows] = await db.query(`
+        SELECT u.user_id
+        FROM users u
+        JOIN sub_departments sd ON u.sub_department_id = sd.sub_department_id
+        WHERE sd.manager_id = ?
+      `, [managerId]);
+
+      if (!rows) {
+        throw new Error('No users found for the given manager');
+      }
+
+      return rows;
+    } catch (error) {
+      console.error('Error fetching users for Manager:', error);
+      throw error;
+    }
   },
   getUsersForTeamMember: async (department_id) => {
     const query = `

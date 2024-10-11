@@ -2,8 +2,6 @@ const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
 
-
-
 exports.getUserById = (req, res) => {
   const userId = req.user.user_id; // Use the user ID from the authenticated user
   console.log('Fetching user with ID:', userId); // Log the user ID
@@ -96,15 +94,23 @@ exports.deleteUser = (req, res) => {
 
 exports.getUsersForManager = async (req, res) => {
   try {
-    const { manager_id } = req.query;
-    console.log('Fetching users for Manager with manager_id:', manager_id); // Debugging log
+    const managerId = req.user.manager_id; // Ensure manager_id is available in req.user
 
-    const users = await User.getUsersForManager(manager_id);
-    console.log('Fetched users for Manager:', users); // Debugging log
+    console.log('Fetching users for Manager with manager_id:', managerId); // Debugging log
+    if (!managerId) {
+      throw new Error('Manager ID is not available');
+    }
+    console.log(`Fetching users for Manager with manager_id: ${managerId}`);
 
-    res.json({ data: { users } });
+    const users = await User.getUsersForManager(managerId);
+
+    if (!Array.isArray(users)) {
+      throw new TypeError('Expected an array of users');
+    }
+
+    res.json(users);
   } catch (error) {
-    console.error('Error fetching users for Manager:', error); // Debugging log
+    console.error('Error fetching users for Manager:', error);
     res.status(500).json({ error: 'Error fetching users for Manager' });
   }
 };
