@@ -19,7 +19,7 @@ exports.createTask = (req, res) => {
   Task.create(taskData, (err, result) => {
     if (err) {
       return res.status(500).json({ error: err.message });
-    // Remove the extra closing brace
+    }
 
     const taskId = result.taskId;
 
@@ -31,7 +31,7 @@ exports.createTask = (req, res) => {
             if (err) {
               console.error(`Error inserting into task_assignees for userId ${userId}:`, err);
               return reject(err);
-            // Remove the extra closing brace
+            }
             resolve();
           });
         }))
@@ -142,19 +142,6 @@ exports.updateTaskStatus = (req, res) => {
     return res.status(400).json({ error: 'Invalid status value' });
   }
 
-  console.log(`Updating task ${taskId} to status ${status}`); // Log the task ID and new status
-
-  // Update only the status field
-  exports.updateTaskStatus = (req, res) => {
-    const taskId = req.params.id;
-    const { status } = req.body;
-  
-    // Validate status
-    const validStatuses = ['pending', 'in progress', 'completed'];
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({ error: 'Invalid status value' });
-    }
-  
     console.log(`Updating task ${taskId} to status ${status}`); // Log the task ID and new status
   
     // Update only the status field

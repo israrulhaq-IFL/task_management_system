@@ -42,11 +42,38 @@ exports.getAllUsers = (req, res) => {
 exports.updateUser = (req, res) => {
   const userId = req.params.id;
   const userData = req.body;
+
   User.update(userId, userData, (err, result) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    res.status(200).json({ message: 'User updated successfully' });
+
+    // Check if the user is assigned the role of HOD and a department
+    if (userData.role === 'HOD' && userData.department_id) {
+      // Update the HOD ID in the department table
+      const sql = 'UPDATE departments SET hod_id = ? WHERE department_id = ?';
+      db.query(sql, [userId, userData.department_id], (err, result) => {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+        res.status(200).json({ message: 'User and department updated successfully' });
+      });
+    } else if (userData.role === 'Manager' || userData.role === 'Team Member') {
+      // Ensure sub_department_id is not null if the role is Manager or Team Member
+      if (!userData.sub_department_id) {
+        return res.status(400).json({ error: 'Sub-department is required for Manager and Team Member roles' });
+      }
+      res.status(200).json({ message: 'User updated successfully' });
+    } else {
+      // If the role is not HOD or no department is assigned, clear the HOD ID in the department table
+      const sql = 'UPDATE departments SET hod_id = NULL WHERE hod_id = ?';
+      db.query(sql, [userId], (err, result) => {
+        if (err) {
+          return res.status(500).json({ error: err.message });
+        }
+        res.status(200).json({ message: 'User updated successfully' });
+      });
+    }
   });
 };
 
@@ -82,9 +109,17 @@ exports.deleteUser = (req, res) => {
         console.error('Error deleting user:', err.message);
         return res.status(500).json({ error: err.message });
       }
-      console.log('User deleted successfully');
-      return res.status(200).json({ message: 'User deleted successfully' });
-    });
+       // Clear the HOD ID in the department table if the deleted user was an HOD
+       const sql = 'UPDATE departments SET hod_id = NULL WHERE hod_id = ?';
+       db.query(sql, [userIdToDelete], (err, result) => {
+         if (err) {
+           console.error('Error clearing HOD ID in department:', err.message);
+           return res.status(500).json({ error: err.message });
+         }
+         console.log('User and department updated successfully');
+         return res.status(200).json({ message: 'User deleted successfully' });
+       });
+     });
   } else {
     // For other roles, add additional checks if necessary
     console.log('Permission denied for user role:', loggedInUserRole);

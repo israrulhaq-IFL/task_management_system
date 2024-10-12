@@ -1,4 +1,4 @@
-const db = require('../config/db'); // Use the db configuration from db.js
+const db = require('../config/db');
 
 const Department = {
   create: (departmentData, callback) => {
@@ -10,7 +10,11 @@ const Department = {
     db.query(sql, [departmentId], callback);
   },
   getAll: (callback) => {
-    const sql = 'SELECT * FROM departments';
+    const sql = `
+      SELECT d.*, u.name AS hod_name
+      FROM departments d
+      LEFT JOIN users u ON d.hod_id = u.user_id
+    `;
     db.query(sql, callback);
   },
   update: (departmentId, departmentData, callback) => {

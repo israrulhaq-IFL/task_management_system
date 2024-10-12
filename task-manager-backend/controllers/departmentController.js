@@ -1,7 +1,8 @@
 const Department = require('../models/departmentModel');
 
 exports.createDepartment = (req, res) => {
-  const departmentData = req.body;
+  const { department_name } = req.body; // Only extract department_name
+  const departmentData = { department_name }; // Create departmentData object with only department_name
   Department.create(departmentData, (err, result) => {
     if (err) {
       return res.status(500).json({ error: err.message });
@@ -31,7 +32,8 @@ exports.getAllDepartments = (req, res) => {
 
 exports.updateDepartment = (req, res) => {
   const departmentId = req.params.id;
-  const departmentData = req.body;
+  const { department_name } = req.body; // Only extract department_name
+  const departmentData = { department_name }; // Create departmentData object with only department_name
   Department.update(departmentId, departmentData, (err, result) => {
     if (err) {
       return res.status(500).json({ error: err.message });

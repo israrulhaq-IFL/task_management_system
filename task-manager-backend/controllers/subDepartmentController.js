@@ -1,20 +1,20 @@
 const db = require('../config/db'); // Use the db configuration from db.js
 
 exports.createSubDepartment = (req, res) => {
-  const { sub_department_name, manager_id, department_id } = req.body;
+  const { sub_department_name, department_id } = req.body;
 
   // Check for missing fields
-  if (!sub_department_name || !manager_id || !department_id) {
-    return res.status(400).json({ error: 'Missing required fields: sub_department_name, manager_id, department_id' });
+  if (!sub_department_name || !department_id) {
+    return res.status(400).json({ error: 'Missing required fields: sub_department_name, department_id' });
   }
 
-  const sql = 'INSERT INTO sub_departments (sub_department_name, manager_id, department_id) VALUES (?, ?, ?)';
-  db.query(sql, [sub_department_name, manager_id, department_id], (err, result) => {
+  const sql = 'INSERT INTO sub_departments (sub_department_name, department_id) VALUES (?, ?)';
+  db.query(sql, [sub_department_name, department_id], (err, result) => {
     if (err) {
       console.error('Error creating sub-department:', err);
       return res.status(500).json({ error: 'Error creating sub-department', details: err.message });
     }
-    res.status(201).json({ sub_department_id: result.insertId, sub_department_name, manager_id, department_id });
+    res.status(201).json({ sub_department_id: result.insertId, sub_department_name, department_id });
   });
 };
 
@@ -60,15 +60,15 @@ exports.getAllSubDepartments = (req, res) => {
 
 exports.updateSubDepartment = (req, res) => {
   const { id } = req.params;
-  const { sub_department_name, manager_id, department_id } = req.body;
+  const { sub_department_name, department_id } = req.body;
 
   // Check for missing fields
-  if (!sub_department_name || !manager_id || !department_id) {
-    return res.status(400).json({ error: 'Missing required fields: sub_department_name, manager_id, department_id' });
+  if (!sub_department_name || !department_id) {
+    return res.status(400).json({ error: 'Missing required fields: sub_department_name, department_id' });
   }
 
   const sql = 'UPDATE sub_departments SET ? WHERE sub_department_id = ?';
-  db.query(sql, [{ sub_department_name, manager_id, department_id }, id], (err, result) => {
+  db.query(sql, [{ sub_department_name, department_id }, id], (err, result) => {
     if (err) {
       console.error('Error updating sub-department:', err);
       return res.status(500).json({ error: 'Error updating sub-department', details: err.message });
@@ -79,7 +79,6 @@ exports.updateSubDepartment = (req, res) => {
     res.json({ message: 'Sub-department updated successfully' });
   });
 };
-
 exports.deleteSubDepartment = (req, res) => {
   const { id } = req.params;
 

@@ -10,7 +10,16 @@ const SubDepartment = {
     db.query(sql, [subDepartmentId], callback);
   },
   getAll: (callback) => {
-    const sql = 'SELECT * FROM sub_departments';
+    const sql = `
+      SELECT 
+        sd.sub_department_id, 
+        sd.sub_department_name, 
+        COALESCE(u.username, 'undefined') AS manager_name, 
+        COALESCE(d.department_name, 'undefined') AS department_name
+      FROM sub_departments sd
+      LEFT JOIN users u ON sd.manager_id = u.user_id
+      LEFT JOIN departments d ON sd.department_id = d.department_id
+    `;
     db.query(sql, callback);
   },
   update: (subDepartmentId, subDepartmentData, callback) => {
