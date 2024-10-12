@@ -34,7 +34,7 @@ const UserManagement = () => {
   }, []);
 
   const fetchUsers = useCallback(async () => {
-    const token = localStorage.getItem('accessTokenn');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       console.error('No token found in localStorage');
       setError('No token found');

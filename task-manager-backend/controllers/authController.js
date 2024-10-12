@@ -15,8 +15,8 @@ const generateAccessToken = (user) => {
 
 // Generate Refresh Token
 const generateRefreshToken = (user) => {
-  return jwt.sign({ id: user.user_id, role: user.role }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
-};
+    return jwt.sign({ id: user.user_id, role: user.role }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
+  };
 
 exports.register = (req, res) => {
   const errors = validationResult(req);
@@ -70,7 +70,7 @@ exports.login = (req, res) => {
 
    // console.log('Stored hashed password:', user.password); // Log the stored hashed password
 
-    bcrypt.compare(password, user.password, (err, isMatch) => {
+    bcrypt.compare(password, user.password, async (err, isMatch) => {
       if (err) {
         console.error('Error comparing passwords:', err.message);
         return res.status(500).json({ error: err.message });
@@ -84,7 +84,7 @@ exports.login = (req, res) => {
       const refreshToken = generateRefreshToken(user);
 
       // Save the refresh token in the database or a secure storage
-      User.saveRefreshToken(user.user_id, refreshToken);
+      await User.saveRefreshToken(user.user_id, refreshToken);
 
       console.log('Generated tokens:', { accessToken, refreshToken }); // Log the generated tokens
       res.status(200).json({ accessToken, refreshToken });

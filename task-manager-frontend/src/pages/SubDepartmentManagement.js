@@ -14,6 +14,8 @@ const SubDepartmentManagement = () => {
     manager_id: '',
     department_id: ''
   });
+  const [editMode, setEditMode] = useState(false); // State to track if we are in edit mode
+  const [editSubDepartmentId, setEditSubDepartmentId] = useState(null); // State to store the ID of the sub-department being edited
   const token = localStorage.getItem('accessToken'); // Get the token from local storage
 
   const fetchSubDepartments = useCallback(async () => {
@@ -74,20 +76,88 @@ const SubDepartmentManagement = () => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+
+    // Check if the selected manager is already assigned to a sub-department in a different department
+    const isManagerAssignedToDifferentDepartment = subDepartments.some(subDept => 
+      subDept.manager_id === formData.manager_id && subDept.department_id !== formData.department_id
+    );
+    if (isManagerAssignedToDifferentDepartment) {
+      setError('The selected manager is already assigned to a sub-department in a different department.');
+      return;
+    }
+
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/sub-departments`, formData, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setSubDepartments([...subDepartments, response.data]);
+      if (editMode) {
+        // Update existing sub-department
+        const response = await axios.put(`${API_BASE_URL}/api/sub-departments/${editSubDepartmentId}`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        // Update the sub-departments state with the updated sub-department data
+        setSubDepartments(subDepartments.map(subDept => (subDept.sub_department_id === editSubDepartmentId ? response.data : subDept)));
+        setEditMode(false);
+        setEditSubDepartmentId(null);
+      } else {
+        // Create new sub-department
+        const response = await axios.post(`${API_BASE_URL}/api/sub-departments`, formData, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        // Check if the response contains the created sub-department data
+        if (response.data.sub_department_id) {
+          // Update the sub-departments state with the new sub-department data
+          setSubDepartments([...subDepartments, response.data]);
+        } else {
+          // Manually update the sub-department data in the state
+          const newSubDepartment = {
+            sub_department_id: response.data.subDepartmentId,
+            sub_department_name: formData.sub_department_name,
+            manager_id: formData.manager_id,
+            department_id: formData.department_id
+          };
+          setSubDepartments([...subDepartments, newSubDepartment]);
+        }
+      }
+
       setFormData({ sub_department_name: '', manager_id: '', department_id: '' });
     } catch (error) {
-      console.error('There was an error creating the sub-department!', error);
+      console.error('There was an error creating/updating the sub-department!', error);
       if (error.response) {
         console.error('Error response:', error.response.data);
         setError(error.response.data.error);
       }
     }
   };
+
+  const handleEdit = (subDepartment) => {
+    setFormData({
+      sub_department_name: subDepartment.sub_department_name,
+      manager_id: subDepartment.manager_id,
+      department_id: subDepartment.department_id
+    });
+    setEditMode(true);
+    setEditSubDepartmentId(subDepartment.sub_department_id);
+  };
+
+  const handleDelete = async (subDepartmentId) => {
+    try {
+      await axios.delete(`${API_BASE_URL}/api/sub-departments/${subDepartmentId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSubDepartments(subDepartments.filter(subDept => subDept.sub_department_id !== subDepartmentId));
+    } catch (error) {
+      console.error('There was an error deleting the sub-department!', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        setError(error.response.data.error);
+      }
+    }
+  };
+
+  // Filter out managers who are already assigned to sub-departments in different departments
+  const availableManagers = managers.filter(manager => 
+    !subDepartments.some(subDept => subDept.manager_id === manager.user_id && subDept.department_id !== formData.department_id)
+  );
 
   return (
     <Container className="sub-department-management">
@@ -102,7 +172,7 @@ const SubDepartmentManagement = () => {
           <Form.Label>Manager</Form.Label>
           <Form.Control as="select" name="manager_id" value={formData.manager_id} onChange={handleInputChange}>
             <option value="">Select Manager</option>
-            {managers.map(manager => (
+            {availableManagers.map(manager => (
               <option key={manager.user_id} value={manager.user_id}>{manager.name}</option>
             ))}
           </Form.Control>
@@ -116,7 +186,7 @@ const SubDepartmentManagement = () => {
             ))}
           </Form.Control>
         </Form.Group>
-        <Button variant="primary" type="submit">Create Sub-Department</Button>
+        <Button variant="primary" type="submit">{editMode ? 'Update Sub-Department' : 'Create Sub-Department'}</Button>
       </Form>
       <Table striped bordered hover>
         <thead>
@@ -125,6 +195,7 @@ const SubDepartmentManagement = () => {
             <th>Sub-Department Name</th>
             <th>Manager Name</th>
             <th>Department Name</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -134,6 +205,10 @@ const SubDepartmentManagement = () => {
               <td>{subDepartment.sub_department_name}</td>
               <td>{subDepartment.manager_name || 'Unknown'}</td>
               <td>{subDepartment.department_name || 'Unknown'}</td>
+              <td>
+                <Button variant="warning" onClick={() => handleEdit(subDepartment)}>Edit</Button>{' '}
+                <Button variant="danger" onClick={() => handleDelete(subDepartment.sub_department_id)}>Delete</Button>
+              </td>
             </tr>
           ))}
         </tbody>
