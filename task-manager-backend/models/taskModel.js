@@ -77,24 +77,36 @@ const Task = {
     });
   },
 
-  delete: (taskId, callback) => {
-    const sql = 'DELETE FROM tasks WHERE task_id = ?';
-    db.query(sql, [taskId], (err, result) => {
-      if (err) return callback(err);
+  delete: async (taskId, callback) => {
+    try {
+      const sql = 'DELETE FROM tasks WHERE task_id = ?';
+      const [result] = await db.promise().query(sql, [taskId]);
 
       const deleteAssigneesSql = 'DELETE FROM task_assignees WHERE task_id = ?';
-      db.query(deleteAssigneesSql, [taskId], (err) => {
-        if (err) return callback(err);
-      });
+      await db.promise().query(deleteAssigneesSql, [taskId]);
 
       const deleteSubDepartmentsSql = 'DELETE FROM task_sub_departments WHERE task_id = ?';
-      db.query(deleteSubDepartmentsSql, [taskId], (err) => {
-        if (err) return callback(err);
-      });
+      await db.promise().query(deleteSubDepartmentsSql, [taskId]);
 
       callback(null, result);
+    } catch (err) {
+      callback(err);
+    }
+  },
+  updateStatus: (taskId, status, callback) => {
+    const sql = 'UPDATE tasks SET status = ? WHERE task_id = ?';
+    db.query(sql, [status, taskId], (err, result) => {
+      if (err) {
+        return callback(err);
+      }
+      callback(null, result);
     });
-  }
+  },
+
+
 };
+
+
+
 
 module.exports = Task;

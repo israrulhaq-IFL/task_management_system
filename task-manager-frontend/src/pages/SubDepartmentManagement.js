@@ -131,9 +131,9 @@ const SubDepartmentManagement = () => {
 
   const handleEdit = (subDepartment) => {
     setFormData({
-      sub_department_name: subDepartment.sub_department_name,
-      manager_id: subDepartment.manager_id,
-      department_id: subDepartment.department_id
+      sub_department_name: subDepartment.sub_department_name || '',
+      manager_id: subDepartment.manager_id || '',
+      department_id: subDepartment.department_id || ''
     });
     setEditMode(true);
     setEditSubDepartmentId(subDepartment.sub_department_id);

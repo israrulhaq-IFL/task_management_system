@@ -2,9 +2,6 @@ const Task = require('../models/taskModel');
 const TaskAssignee = require('../models/taskAssignee');
 const TaskSubDepartment = require('../models/taskSubDepartment');
 
-
-
-
 exports.createTask = (req, res) => {
   const { title, description, priority, status, assigned_to, created_by, department_id, sub_department_ids } = req.body;
 
@@ -22,7 +19,7 @@ exports.createTask = (req, res) => {
   Task.create(taskData, (err, result) => {
     if (err) {
       return res.status(500).json({ error: err.message });
-    }
+    // Remove the extra closing brace
 
     const taskId = result.taskId;
 
@@ -34,7 +31,7 @@ exports.createTask = (req, res) => {
             if (err) {
               console.error(`Error inserting into task_assignees for userId ${userId}:`, err);
               return reject(err);
-            }
+            // Remove the extra closing brace
             resolve();
           });
         }))
@@ -64,7 +61,6 @@ exports.createTask = (req, res) => {
       });
   });
 };
-
 
 exports.getTaskById = (req, res) => {
   const taskId = req.params.id;
@@ -117,37 +113,10 @@ exports.updateTask = (req, res) => {
     department_id
   };
 
-  Task.update(taskId, taskData, (err, result) => {
+  Task.update(taskId, taskData, assigned_to, sub_department_ids, (err, result) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-
-    // Update task_assignees
-    TaskAssignee.deleteByTaskId(taskId, (err) => {
-      if (err) return res.status(500).json({ error: err.message });
-
-      if (assigned_to && assigned_to.length > 0) {
-        assigned_to.forEach(userId => {
-          TaskAssignee.create(taskId, userId, (err) => {
-            if (err) return res.status(500).json({ error: err.message });
-          });
-        });
-      }
-    });
-
-    // Update task_sub_departments
-    TaskSubDepartment.deleteByTaskId(taskId, (err) => {
-      if (err) return res.status(500).json({ error: err.message });
-
-      if (sub_department_ids && sub_department_ids.length > 0) {
-        sub_department_ids.forEach(subDepartmentId => {
-          TaskSubDepartment.create(taskId, subDepartmentId, (err) => {
-            if (err) return res.status(500).json({ error: err.message });
-          });
-        });
-      }
-    });
-
     res.status(200).json({ message: 'Task updated successfully' });
   });
 };
@@ -158,17 +127,6 @@ exports.deleteTask = (req, res) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-
-    // Delete task_assignees
-    TaskAssignee.deleteByTaskId(taskId, (err) => {
-      if (err) return res.status(500).json({ error: err.message });
-    });
-
-    // Delete task_sub_departments
-    TaskSubDepartment.deleteByTaskId(taskId, (err) => {
-      if (err) return res.status(500).json({ error: err.message });
-    });
-
     res.status(200).json({ message: 'Task deleted successfully' });
   });
 };
@@ -186,14 +144,28 @@ exports.updateTaskStatus = (req, res) => {
 
   console.log(`Updating task ${taskId} to status ${status}`); // Log the task ID and new status
 
-  Task.update(taskId, { status }, (err, result) => {
-    if (err) {
-      console.error('Error updating task status:', err); // Log the error
-      return res.status(500).json({ error: 'Internal server error' });
+  // Update only the status field
+  exports.updateTaskStatus = (req, res) => {
+    const taskId = req.params.id;
+    const { status } = req.body;
+  
+    // Validate status
+    const validStatuses = ['pending', 'in progress', 'completed'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Invalid status value' });
     }
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Task not found' });
-    }
-    res.json({ message: 'Task status updated successfully' });
-  });
-};
+  
+    console.log(`Updating task ${taskId} to status ${status}`); // Log the task ID and new status
+  
+    // Update only the status field
+    Task.updateStatus(taskId, status, (err, result) => {
+      if (err) {
+        console.error('Error updating task status:', err); // Log the error
+        return res.status(500).json({ error: 'Internal server error' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'Task not found' });
+      }
+      res.json({ message: 'Task status updated successfully' });
+    });
+  };
