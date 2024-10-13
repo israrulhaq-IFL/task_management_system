@@ -95,13 +95,16 @@ const Task = {
   },
   updateStatus: (taskId, status, callback) => {
     const sql = 'UPDATE tasks SET status = ? WHERE task_id = ?';
+    console.log(`Executing SQL: ${sql} with status: ${status} and taskId: ${taskId}`); // Log the SQL query and parameters
     db.query(sql, [status, taskId], (err, result) => {
       if (err) {
+        console.error('Error executing SQL:', err); // Log the error
         return callback(err);
       }
+      console.log(`SQL execution result:`, result); // Log the result
       callback(null, result);
     });
-  },
+  }
 
 
 };

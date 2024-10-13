@@ -31,16 +31,27 @@ const HeadOfDepartmentDashboard = () => {
     fetchTasks();
   }, []);
 
-  const handleStatusChange = () => {
-    setShowError(true);
-  };
-
-  const handleDelete = async (id) => {
+  const handleStatusChange = async (taskId, newStatus) => {
     try {
-      await axios.delete(`${API_BASE_URL}/api/tasks/${id}`, {
+      await axios.put(`${API_BASE_URL}/api/tasks/${taskId}/status`, { status: newStatus }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
-      setTasks(tasks.filter(task => task.id !== id));
+      setTasks(tasks.map(task => task.task_id === taskId ? { ...task, status: newStatus } : task));
+    } catch (error) {
+      console.error('There was an error updating the task status!', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        setError(error.response.data.error);
+      }
+    }
+  };
+
+  const handleDelete = async (taskId) => {
+    try {
+      await axios.delete(`${API_BASE_URL}/api/tasks/${taskId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      setTasks(tasks.filter(task => task.task_id !== taskId));
     } catch (error) {
       console.error('There was an error deleting the task!', error);
       if (error.response) {

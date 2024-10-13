@@ -105,6 +105,8 @@ exports.updateTask = (req, res) => {
   const taskId = req.params.id;
   const { title, description, priority, status, assigned_to, department_id, sub_department_ids } = req.body;
 
+  console.log(`updateTask route triggered for task ${taskId}`); // Log the route trigger
+
   const taskData = {
     title,
     description,
@@ -131,28 +133,34 @@ exports.deleteTask = (req, res) => {
   });
 };
 
+
 // Update task status
 exports.updateTaskStatus = (req, res) => {
   const taskId = req.params.id;
   const { status } = req.body;
 
+  console.log(`updateTaskStatus route triggered for task ${taskId}`); // Log the route trigger
+
   // Validate status
   const validStatuses = ['pending', 'in progress', 'completed'];
   if (!validStatuses.includes(status)) {
+    console.error(`Invalid status value: ${status}`); // Log invalid status
     return res.status(400).json({ error: 'Invalid status value' });
   }
 
-    console.log(`Updating task ${taskId} to status ${status}`); // Log the task ID and new status
-  
-    // Update only the status field
-    Task.updateStatus(taskId, status, (err, result) => {
-      if (err) {
-        console.error('Error updating task status:', err); // Log the error
-        return res.status(500).json({ error: 'Internal server error' });
-      }
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ error: 'Task not found' });
-      }
-      res.json({ message: 'Task status updated successfully' });
-    });
-  };
+  console.log(`Updating task ${taskId} to status ${status}`); // Log the task ID and new status
+
+  // Update only the status field
+  Task.updateStatus(taskId, status, (err, result) => {
+    if (err) {
+      console.error('Error updating task status:', err); // Log the error
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+    if (result.affectedRows === 0) {
+      console.error(`Task not found: ${taskId}`); // Log task not found
+      return res.status(404).json({ error: 'Task not found' });
+    }
+    console.log(`Task ${taskId} status updated to ${status}`); // Log successful update
+    return res.json({ message: 'Task status updated successfully' }); // Ensure the response is sent
+  });
+};
