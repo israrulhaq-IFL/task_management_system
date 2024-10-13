@@ -29,7 +29,17 @@ const SubDepartment = {
   delete: (subDepartmentId, callback) => {
     const sql = 'DELETE FROM sub_departments WHERE sub_department_id = ?';
     db.query(sql, [subDepartmentId], callback);
+  },
+  updateManager: (subDepartmentId, managerId, callback) => {
+    const sql = 'UPDATE sub_departments SET manager_id = ? WHERE sub_department_id = ?';
+    db.query(sql, [managerId, subDepartmentId], callback);
+  },
+  clearManager: (managerId, callback) => {
+    const sql = 'UPDATE sub_departments SET manager_id = NULL WHERE manager_id = ?';
+    db.query(sql, [managerId], callback);
   }
 };
+
+
 
 module.exports = SubDepartment;

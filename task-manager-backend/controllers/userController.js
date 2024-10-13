@@ -43,34 +43,69 @@ exports.updateUser = (req, res) => {
   const userId = req.params.id;
   const userData = req.body;
 
+  console.log('Updating user with ID:', userId); // Log the user ID
+  console.log('User data:', userData); // Log the user data
+
   User.update(userId, userData, (err, result) => {
     if (err) {
+      console.error('Error updating user:', err.message);
       return res.status(500).json({ error: err.message });
     }
 
+    console.log('User updated:', result); // Log the update result
+
     // Check if the user is assigned the role of HOD and a department
     if (userData.role === 'HOD' && userData.department_id) {
-      // Update the HOD ID in the department table
+      console.log('Updating HOD ID in department table'); // Log the HOD update
       const sql = 'UPDATE departments SET hod_id = ? WHERE department_id = ?';
       db.query(sql, [userId, userData.department_id], (err, result) => {
         if (err) {
+          console.error('Error updating HOD ID in department:', err.message);
           return res.status(500).json({ error: err.message });
         }
+        console.log('HOD ID updated in department:', result); // Log the department update result
         res.status(200).json({ message: 'User and department updated successfully' });
       });
     } else if (userData.role === 'Manager' || userData.role === 'Team Member') {
-      // Ensure sub_department_id is not null if the role is Manager or Team Member
       if (!userData.sub_department_id) {
+        console.error('Sub-department is required for Manager and Team Member roles');
         return res.status(400).json({ error: 'Sub-department is required for Manager and Team Member roles' });
       }
-      res.status(200).json({ message: 'User updated successfully' });
+
+      if (userData.role === 'Manager') {
+        console.log('Updating manager ID in subdepartment table'); // Log the manager update
+        const sql = 'UPDATE sub_departments SET manager_id = ? WHERE sub_department_id = ?';
+        db.query(sql, [userId, userData.sub_department_id], (err, result) => {
+          if (err) {
+            console.error('Error updating manager ID in subdepartment:', err.message);
+            return res.status(500).json({ error: err.message });
+          }
+          console.log('Manager ID updated in subdepartment:', result); // Log the subdepartment update result
+          res.status(200).json({ message: 'User and sub-department updated successfully' });
+        });
+      } else {
+        res.status(200).json({ message: 'User updated successfully' });
+      }
     } else {
-      // If the role is not HOD or no department is assigned, clear the HOD ID in the department table
+      console.log('Clearing HOD ID in department table'); // Log the HOD clear
       const sql = 'UPDATE departments SET hod_id = NULL WHERE hod_id = ?';
       db.query(sql, [userId], (err, result) => {
         if (err) {
+          console.error('Error clearing HOD ID in department:', err.message);
           return res.status(500).json({ error: err.message });
         }
+        console.log('HOD ID cleared in department:', result); // Log the department clear result
+        res.status(200).json({ message: 'User updated successfully' });
+      });
+
+      console.log('Clearing manager ID in subdepartment table'); // Log the manager clear
+      const clearManagerSql = 'UPDATE sub_departments SET manager_id = NULL WHERE manager_id = ?';
+      db.query(clearManagerSql, [userId], (err, result) => {
+        if (err) {
+          console.error('Error clearing manager ID in subdepartment:', err.message);
+          return res.status(500).json({ error: err.message });
+        }
+        console.log('Manager ID cleared in subdepartment:', result); // Log the subdepartment clear result
         res.status(200).json({ message: 'User updated successfully' });
       });
     }
