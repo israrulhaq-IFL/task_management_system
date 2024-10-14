@@ -5,7 +5,7 @@
   overflow: hidden;
   max-height: 150px; /* Adjust based on the initial content height */
 
-  width: 300px; /* Fixed width for all task cards */
+  width: 350px; /* Fixed width for all task cards */
 }
 
 .task-card.expanded {

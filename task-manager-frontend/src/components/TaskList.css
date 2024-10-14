@@ -1,11 +1,24 @@
 .task-list-container {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Align items to the top */
+  height: 100vh; /* Full viewport height */
+  padding: 20px; /* Optional: Add padding around the container */
+}
+
+.task-list-box {
+  display: flex;
+  flex-direction: row;
+  overflow-y: auto; /* Enable vertical scrolling */
+  max-height: 100%; /* Use full height of the container */
+  width: 100%; /* Use full width of the container */
+  padding: 10px; /* Optional: Add padding inside the box */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Add a shadow for better visibility */
 }
 
 .task-column {
+  flex: 1;
+  margin: 0 10px;
   background-color: #f8f9fa;
   border-radius: 8px;
   padding: 10px;
@@ -49,4 +62,23 @@
 
 .task-column .card {
   margin-bottom: 10px;
+}
+
+/* Custom scrollbar styles */
+.task-list-box::-webkit-scrollbar {
+  width: 8px; /* Width of the scrollbar */
+}
+
+.task-list-box::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Background of the scrollbar track */
+  border-radius: 10px;
+}
+
+.task-list-box::-webkit-scrollbar-thumb {
+  background: #888; /* Color of the scrollbar thumb */
+  border-radius: 10px;
+}
+
+.task-list-box::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Color of the scrollbar thumb on hover */
 }

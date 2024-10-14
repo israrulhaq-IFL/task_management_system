@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Card, Button, Form, Dropdown, Modal } from 'react-bootstrap';
-import {  Trash } from 'react-bootstrap-icons'; // Import the icons
+import { Trash } from 'react-bootstrap-icons'; // Import the icons
 import './TaskCard.css'; // Import the CSS file
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';

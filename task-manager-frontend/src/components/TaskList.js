@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import TaskCard from './TaskCard';
 import { Badge } from 'react-bootstrap';
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import './TaskList.css'; // Import the CSS file
+
+const ItemTypes = {
+  TASK: 'task',
+};
 
 const TaskList = ({ tasks, onDelete, onStatusChange }) => {
   const [taskList, setTaskList] = useState(tasks);
@@ -29,63 +35,70 @@ const TaskList = ({ tasks, onDelete, onStatusChange }) => {
     }
   };
 
+  const moveTask = (taskId, newStatus) => {
+    handleStatusChange(taskId, newStatus);
+  };
+
+  const Task = ({ task, index, status }) => {
+    const [, ref] = useDrag({
+      type: ItemTypes.TASK,
+      item: { taskId: task.task_id, status },
+    });
+
+    return (
+      <div ref={ref}>
+        <TaskCard
+          task={task}
+          onDelete={onDelete}
+          onStatusChange={handleStatusChange}
+          isExpanded={status === 'pending' ? expandedPendingTaskId === task.task_id : status === 'in progress' ? expandedInProgressTaskId === task.task_id : expandedCompletedTaskId === task.task_id}
+          onExpand={() => handleExpand(task.task_id, status)}
+        />
+      </div>
+    );
+  };
+
+  const Column = ({ status, children }) => {
+    const [, ref] = useDrop({
+      accept: ItemTypes.TASK,
+      drop: (item) => moveTask(item.taskId, status),
+    });
+
+    return (
+      <div ref={ref} className="task-column">
+        <div className="task-column-header">
+          <h3>{status.charAt(0).toUpperCase() + status.slice(1)}</h3>
+          <Badge pill className={`task-count ${status.replace(' ', '-')} shadow-sm`}>{children.length}</Badge>
+        </div>
+        {children}
+      </div>
+    );
+  };
+
   const pendingTasks = taskList.filter(task => task.status === 'pending');
   const inProgressTasks = taskList.filter(task => task.status === 'in progress');
   const completedTasks = taskList.filter(task => task.status === 'completed');
 
   return (
-    <div className="task-list-container">
-      <div className="task-column">
-        <div className="task-column-header">
-          <h3>Pending</h3>
-          <Badge pill className="task-count primary shadow-sm">{pendingTasks.length}</Badge>
-        </div>
-        {pendingTasks.map(task => (
-          <TaskCard
-            key={task.task_id}
-            task={task}
-            onDelete={onDelete}
-            onStatusChange={handleStatusChange}
-            isExpanded={expandedPendingTaskId === task.task_id}
-            onExpand={() => handleExpand(task.task_id, 'pending')}
-          />
-        ))}
+    <DndProvider backend={HTML5Backend}>
+      <div className="task-list-container">
+        <Column status="pending">
+          {pendingTasks.map((task, index) => (
+            <Task key={task.task_id} task={task} index={index} status="pending" />
+          ))}
+        </Column>
+        <Column status="in progress">
+          {inProgressTasks.map((task, index) => (
+            <Task key={task.task_id} task={task} index={index} status="in progress" />
+          ))}
+        </Column>
+        <Column status="completed">
+          {completedTasks.map((task, index) => (
+            <Task key={task.task_id} task={task} index={index} status="completed" />
+          ))}
+        </Column>
       </div>
-
-      <div className="task-column">
-        <div className="task-column-header">
-          <h3>In Progress</h3>
-          <Badge pill className="task-count warning shadow-sm">{inProgressTasks.length}</Badge>
-        </div>
-        {inProgressTasks.map(task => (
-          <TaskCard
-            key={task.task_id}
-            task={task}
-            onDelete={onDelete}
-            onStatusChange={handleStatusChange}
-            isExpanded={expandedInProgressTaskId === task.task_id}
-            onExpand={() => handleExpand(task.task_id, 'in progress')}
-          />
-        ))}
-      </div>
-
-      <div className="task-column">
-        <div className="task-column-header">
-          <h3>Completed</h3>
-          <Badge pill className="task-count success shadow-sm">{completedTasks.length}</Badge>
-        </div>
-        {completedTasks.map(task => (
-          <TaskCard
-            key={task.task_id}
-            task={task}
-            onDelete={onDelete}
-            onStatusChange={handleStatusChange}
-            isExpanded={expandedCompletedTaskId === task.task_id}
-            onExpand={() => handleExpand(task.task_id, 'completed')}
-          />
-        ))}
-      </div>
-    </div>
+    </DndProvider>
   );
 };
 

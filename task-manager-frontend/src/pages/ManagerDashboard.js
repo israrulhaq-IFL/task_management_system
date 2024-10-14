@@ -38,6 +38,12 @@ const ManagerDashboard = () => {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
+      // Ensure the status values match the backend expectations
+      const validStatuses = ['pending', 'in progress', 'completed'];
+      if (!validStatuses.includes(newStatus)) {
+        throw new Error('Invalid status value');
+      }
+
       await axios.put(`${API_BASE_URL}/api/tasks/${id}/status`, { status: newStatus }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
@@ -47,6 +53,8 @@ const ManagerDashboard = () => {
       if (error.response) {
         console.error('Error response:', error.response.data);
         setError(error.response.data.error);
+      } else {
+        setError(error.message);
       }
     }
   };
@@ -54,7 +62,7 @@ const ManagerDashboard = () => {
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${API_BASE_URL}/api/tasks/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accesstoken')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setTasks(tasks.filter(task => task.task_id !== id));
     } catch (error) {
@@ -69,7 +77,7 @@ const ManagerDashboard = () => {
   const addTask = async (task) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/api/tasks`, task, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accesstoken')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setTasks([...tasks, response.data]);
       setShowForm(false);
