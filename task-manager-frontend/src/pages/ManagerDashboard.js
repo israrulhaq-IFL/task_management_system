@@ -18,6 +18,7 @@ const ManagerDashboard = () => {
         const response = await axios.get(`${API_BASE_URL}/api/tasks`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
+        console.log('Fetched tasks:', response.data); // Log the fetched tasks
         setTasks(response.data);
       } catch (error) {
         console.error('There was an error fetching the tasks!', error);
@@ -37,7 +38,7 @@ const ManagerDashboard = () => {
 
   const handleStatusChange = async (id, newStatus) => {
     try {
-      await axios.put(`${API_BASE_URL}/api/tasks/${id}/status`, { status: newStatus }, { // Ensure correct endpoint
+      await axios.put(`${API_BASE_URL}/api/tasks/${id}/status`, { status: newStatus }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setTasks(tasks.map(task => task.task_id === id ? { ...task, status: newStatus } : task));
@@ -53,7 +54,7 @@ const ManagerDashboard = () => {
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${API_BASE_URL}/api/tasks/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem('accesstoken')}` }
       });
       setTasks(tasks.filter(task => task.task_id !== id));
     } catch (error) {
@@ -68,7 +69,7 @@ const ManagerDashboard = () => {
   const addTask = async (task) => {
     try {
       const response = await axios.post(`${API_BASE_URL}/api/tasks`, task, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem('accesstoken')}` }
       });
       setTasks([...tasks, response.data]);
       setShowForm(false);

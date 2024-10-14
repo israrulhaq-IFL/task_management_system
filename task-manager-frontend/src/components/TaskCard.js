@@ -22,6 +22,12 @@ const TaskCard = ({ task, onDelete, onStatusChange }) => {
     }
   };
 
+  // Ensure assignees and sub_departments are parsed into arrays if they are strings
+  const assignees = task.assignees ? task.assignees.split(',') : [];
+  const subDepartments = task.sub_departments ? task.sub_departments.split(',') : [];
+
+  console.log('Rendering TaskCard with task:', task); // Log the task data
+
   return (
     <Card className="mb-3">
       <Card.Body>
@@ -30,16 +36,16 @@ const TaskCard = ({ task, onDelete, onStatusChange }) => {
           <strong>Description:</strong> {task.description}
         </Card.Text>
         <Card.Text>
-          <strong>Created By:</strong> {task.created_by}
+          <strong>Created By:</strong> {task.created_by_name || 'N/A'}
         </Card.Text>
         <Card.Text>
-          <strong>Assigned To:</strong> {task.assignees ? task.assignees.join(', ') : 'N/A'}
+          <strong>Assigned To:</strong> {assignees.length > 0 ? assignees.join(', ') : 'N/A'}
         </Card.Text>
         <Card.Text>
-          <strong>Subdepartments:</strong> {task.subdepartments ? task.subdepartments.join(', ') : 'N/A'}
+          <strong>Subdepartments:</strong> {subDepartments.length > 0 ? subDepartments.join(', ') : 'N/A'}
         </Card.Text>
         <Card.Text>
-          <strong>Created At:</strong> {new Date(task.created_at).toLocaleString()}
+          <strong>Created At:</strong> {task.created_at ? new Date(task.created_at).toLocaleString() : 'N/A'}
         </Card.Text>
         <Card.Text>
           <strong>Status:</strong> {task.status}

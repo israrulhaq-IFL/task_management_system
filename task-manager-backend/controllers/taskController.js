@@ -68,12 +68,19 @@ exports.getTaskById = (req, res) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }
-    res.status(200).json(result);
+    if (result.length === 0) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+    const task = result[0];
+    task.assignees = task.assignees ? task.assignees.split(',') : [];
+    task.sub_departments = task.sub_departments ? task.sub_departments.split(',') : [];
+    console.log('Fetched task:', task); // Log the fetched task
+    res.status(200).json(task);
   });
 };
 
 exports.getAllTasks = (req, res) => {
-  Task.getAll((err, result) => {
+  Task.getAllDetailed((err, result) => {
     if (err) {
       return res.status(500).json({ error: err.message });
     }

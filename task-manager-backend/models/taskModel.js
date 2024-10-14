@@ -14,17 +14,30 @@ const Task = {
   getById: (taskId, callback) => {
     const sql = `
       SELECT t.*, 
-             GROUP_CONCAT(DISTINCT ta.user_id) AS assignees, 
-             GROUP_CONCAT(DISTINCT tsd.sub_department_id) AS sub_departments
+             GROUP_CONCAT(DISTINCT u.name) AS assignees, 
+             GROUP_CONCAT(DISTINCT sd.sub_department_name) AS sub_departments,
+             creator.name AS created_by_name
       FROM tasks t
       LEFT JOIN task_assignees ta ON t.task_id = ta.task_id
+      LEFT JOIN users u ON ta.user_id = u.user_id
       LEFT JOIN task_sub_departments tsd ON t.task_id = tsd.task_id
+      LEFT JOIN sub_departments sd ON tsd.sub_department_id = sd.sub_department_id
+      LEFT JOIN users creator ON t.created_by = creator.user_id
       WHERE t.task_id = ?
       GROUP BY t.task_id
     `;
-    db.query(sql, [taskId], callback);
+    console.log(`Executing SQL: ${sql} with taskId: ${taskId}`); // Log the SQL query and taskId
+    db.query(sql, [taskId], (err, result) => {
+      if (err) {
+        console.error('Error executing SQL:', err); // Log the error
+        return callback(err);
+      }
+      console.log('SQL execution result:', result); // Log the result
+      callback(null, result);
+    });
   },
 
+  
   getAll: (callback) => {
     const sql = 'SELECT * FROM tasks';
     db.query(sql, callback);
@@ -104,7 +117,26 @@ const Task = {
       console.log(`SQL execution result:`, result); // Log the result
       callback(null, result);
     });
+  },
+
+  getAllDetailed: (callback) => {
+    const sql = `
+      SELECT t.*, 
+             GROUP_CONCAT(DISTINCT u.name) AS assignees, 
+             GROUP_CONCAT(DISTINCT sd.sub_department_name) AS sub_departments,
+             creator.name AS created_by_name
+      FROM tasks t
+      LEFT JOIN task_assignees ta ON t.task_id = ta.task_id
+      LEFT JOIN users u ON ta.user_id = u.user_id
+      LEFT JOIN task_sub_departments tsd ON t.task_id = tsd.task_id
+      LEFT JOIN sub_departments sd ON tsd.sub_department_id = sd.sub_department_id
+      LEFT JOIN users creator ON t.created_by = creator.user_id
+      GROUP BY t.task_id
+    `;
+    db.query(sql, callback);
   }
+
+
 
 
 };

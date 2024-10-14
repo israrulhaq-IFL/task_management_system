@@ -6,6 +6,7 @@ const TaskList = ({ tasks, onDelete, onStatusChange }) => {
   const [taskList, setTaskList] = useState(tasks);
 
   useEffect(() => {
+    console.log('TaskList received tasks:', tasks); // Log the received tasks
     setTaskList(tasks);
   }, [tasks]);
 
