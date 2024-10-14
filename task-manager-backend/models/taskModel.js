@@ -90,22 +90,28 @@ const Task = {
     });
   },
 
-  delete: async (taskId, callback) => {
-    try {
-      const sql = 'DELETE FROM tasks WHERE task_id = ?';
-      const [result] = await db.promise().query(sql, [taskId]);
+  delete: (taskId, callback) => {
+    const sql = 'DELETE FROM tasks WHERE task_id = ?';
+    db.query(sql, [taskId], (err, result) => {
+      if (err) return callback(err);
 
       const deleteAssigneesSql = 'DELETE FROM task_assignees WHERE task_id = ?';
-      await db.promise().query(deleteAssigneesSql, [taskId]);
+      db.query(deleteAssigneesSql, [taskId], (err) => {
+        if (err) return callback(err);
 
-      const deleteSubDepartmentsSql = 'DELETE FROM task_sub_departments WHERE task_id = ?';
-      await db.promise().query(deleteSubDepartmentsSql, [taskId]);
+        const deleteSubDepartmentsSql = 'DELETE FROM task_sub_departments WHERE task_id = ?';
+        db.query(deleteSubDepartmentsSql, [taskId], (err) => {
+          if (err) return callback(err);
 
-      callback(null, result);
-    } catch (err) {
-      callback(err);
-    }
+          callback(null, result);
+        });
+      });
+    });
   },
+
+  // Other methods...
+
+
   updateStatus: (taskId, status, callback) => {
     const sql = 'UPDATE tasks SET status = ? WHERE task_id = ?';
     console.log(`Executing SQL: ${sql} with status: ${status} and taskId: ${taskId}`); // Log the SQL query and parameters
