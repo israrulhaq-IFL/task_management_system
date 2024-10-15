@@ -1,9 +1,10 @@
 const Task = require('../models/taskModel');
 const TaskAssignee = require('../models/taskAssignee');
 const TaskSubDepartment = require('../models/taskSubDepartment');
+const { log } = require('winston');
 
 exports.createTask = (req, res) => {
-  const { title, description, priority, status, assigned_to, created_by, department_id, sub_department_ids } = req.body;
+  const { title, description, priority, status, assigned_to, created_by, department_id, sub_department_ids, target_date } = req.body;
 
   console.log('Assigned to:', assigned_to); // Log the assigned_to array
 
@@ -13,7 +14,8 @@ exports.createTask = (req, res) => {
     priority: priority || 'medium',
     status,
     created_by,
-    department_id
+    department_id,
+    target_date
   };
 
   Task.create(taskData, (err, result) => {
@@ -110,7 +112,7 @@ exports.getTasksBySubDepartment = (req, res) => {
 
 exports.updateTask = (req, res) => {
   const taskId = req.params.id;
-  const { title, description, priority, status, assigned_to, department_id, sub_department_ids } = req.body;
+  const { title, description, priority, status, assigned_to, department_id, sub_department_ids, target_date } = req.body;
 
   console.log(`updateTask route triggered for task ${taskId}`); // Log the route trigger
 
@@ -119,7 +121,8 @@ exports.updateTask = (req, res) => {
     description,
     priority,
     status,
-    department_id
+    department_id,
+    target_date
   };
 
   Task.update(taskId, taskData, assigned_to, sub_department_ids, (err, result) => {
@@ -139,7 +142,6 @@ exports.deleteTask = (req, res) => {
     res.status(200).json({ message: 'Task deleted successfully' });
   });
 };
-
 
 // Update task status
 exports.updateTaskStatus = (req, res) => {
@@ -169,5 +171,50 @@ exports.updateTaskStatus = (req, res) => {
     }
     console.log(`Task ${taskId} status updated to ${status}`); // Log successful update
     return res.json({ message: 'Task status updated successfully' }); // Ensure the response is sent
+  });
+};
+
+// Update task target date
+exports.updateTaskTargetDate = (req, res) => {
+  const taskId = req.params.id;
+  const { target_date } = req.body;
+
+  console.log(`updateTaskTargetDate route triggered for task ${taskId}`); // Log the route trigger
+
+  console.log(`Updating task ${taskId} to target date ${target_date}`); // Log the task ID and new target date
+
+  // Update only the target_date field
+  Task.updateTargetDate(taskId, target_date, (err, result) => {
+    if (err) {
+      console.error('Error updating task target date:', err); // Log the error
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+    if (result.affectedRows === 0) {
+      console.error(`Task not found: ${taskId}`); // Log task not found
+      return res.status(404).json({ error: 'Task not found' });
+    }
+    console.log(`Task ${taskId} target date updated to ${target_date}`); // Log successful update
+    return res.json({ message: 'Task target date updated successfully' }); // Ensure the response is sent
+  });
+};
+
+
+exports.getTasksForManager = (req, res) => {
+  console.log('Request user data:', req.user); // Log the req.user object
+
+  if (!req.user) {
+    return res.status(401).json({ error: 'User not authenticated' });
+  }
+
+  const managerId = req.user.id; // Use id instead of user_id
+  const subDepartmentId = req.user.sub_department_id; // Assuming sub-department ID is available in req.user
+
+  Task.getTasksForManager(managerId, subDepartmentId, (err, result) => {
+    console.log('Fetching tasks for manager:', managerId); // Log the manager ID
+    if (err) {
+      console.error('Error fetching tasks for manager:', err);
+      return res.status(500).json({ error: err.message });
+    }
+    res.status(200).json(result);
   });
 };

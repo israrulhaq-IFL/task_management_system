@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { Card, Button, Form, Dropdown, Modal } from 'react-bootstrap';
-import { Trash } from 'react-bootstrap-icons'; // Import the icons
-import './TaskCard.css'; // Import the CSS file
+import { Trash } from 'react-bootstrap-icons';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import './TaskCard.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
@@ -10,7 +12,9 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [statusDotColor, setStatusDotColor] = useState('');
+  const [targetDate, setTargetDate] = useState(new Date(task.target_date));
   const cardRef = useRef(null);
+  const datePickerWrapperRef = useRef(null); // Add a ref for the date picker wrapper
 
   useEffect(() => {
     updateStatusDotColor(task.status);
@@ -39,22 +43,27 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand }) => {
 
   const handleStatusChange = async (event) => {
     const newStatus = event.target.value;
-    console.log(`Changing status of task ${task.task_id} to ${newStatus}`);
     try {
-      const response = await axios.put(`${API_BASE_URL}/api/tasks/${task.task_id}/status`, { status: newStatus }, {
+      await axios.put(`${API_BASE_URL}/api/tasks/${task.task_id}/status`, { status: newStatus }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accesstoken')}` }
       });
-      console.log('Status update response:', response.data);
       onStatusChange(task.task_id, newStatus);
     } catch (error) {
       console.error('There was an error updating the task status!', error);
-      if (error.response) {
-        console.error('Error response:', error.response.data);
-      }
     }
   };
 
-  // Ensure assignees and sub_departments are parsed into arrays if they are strings
+  const handleTargetDateChange = async (date) => {
+    setTargetDate(date);
+    try {
+      await axios.put(`${API_BASE_URL}/api/tasks/${task.task_id}/target-date`, { target_date: date.toISOString().split('T')[0] }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('accesstoken')}` }
+      });
+    } catch (error) {
+      console.error('There was an error updating the task target date!', error);
+    }
+  };
+
   const assignees = task.assignees ? task.assignees.split(',') : [];
   const subDepartments = task.sub_departments ? task.sub_departments.split(',') : [];
 
@@ -68,8 +77,11 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand }) => {
   };
 
   const handleCardClick = (e) => {
-    // Prevent the card from contracting when clicking on the dropdown menu or status dropdown
-    if (e.target.closest('.task-card-dropdown') || e.target.closest('.task-card-status-dropdown')) {
+    if (
+      e.target.closest('.task-card-dropdown') ||
+      e.target.closest('.task-card-status-dropdown') ||
+      (datePickerWrapperRef.current && datePickerWrapperRef.current.contains(e.target))
+    ) {
       return;
     }
     onExpand();
@@ -98,11 +110,16 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand }) => {
             <Card.Text>
               <strong>Status:</strong> {task.status}
             </Card.Text>
+            <Card.Text>
+              <strong>Target Date:</strong>
+              <div ref={datePickerWrapperRef}>
+                <DatePicker selected={targetDate} onChange={handleTargetDateChange} />
+              </div>
+            </Card.Text>
             <Dropdown onToggle={() => setShowMenu(!showMenu)} show={showMenu} className="task-card-dropdown">
               <Dropdown.Toggle variant="link" id="dropdown-basic" className="task-card-dropdown-toggle">
-            
+                {/* Dropdown Toggle Content */}
               </Dropdown.Toggle>
-
               <Dropdown.Menu>
                 <Dropdown.Item onClick={handleDelete} className="task-card-delete-button">
                   <Trash /> Delete
@@ -117,7 +134,6 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand }) => {
           </>
         )}
       </Card.Body>
-
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Confirm Delete</Modal.Title>

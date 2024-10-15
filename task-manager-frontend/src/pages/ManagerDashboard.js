@@ -15,8 +15,10 @@ const ManagerDashboard = () => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/tasks`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        const token = localStorage.getItem('accessToken'); // Correctly fetch the accessToken from localStorage
+        console.log('Access Token:', token); // Log the token
+        const response = await axios.get(`${API_BASE_URL}/api/tasks/manager`, {
+          headers: { Authorization: `Bearer ${token}` }
         });
         console.log('Fetched tasks:', response.data); // Log the fetched tasks
         setTasks(response.data);
@@ -44,8 +46,9 @@ const ManagerDashboard = () => {
         throw new Error('Invalid status value');
       }
 
+      const token = localStorage.getItem('accessToken'); // Correctly fetch the accessToken from localStorage
       await axios.put(`${API_BASE_URL}/api/tasks/${id}/status`, { status: newStatus }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       setTasks(tasks.map(task => task.task_id === id ? { ...task, status: newStatus } : task));
     } catch (error) {
@@ -61,8 +64,9 @@ const ManagerDashboard = () => {
 
   const handleDelete = async (id) => {
     try {
+      const token = localStorage.getItem('accessToken'); // Correctly fetch the accessToken from localStorage
       await axios.delete(`${API_BASE_URL}/api/tasks/${id}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       setTasks(tasks.filter(task => task.task_id !== id));
     } catch (error) {
@@ -76,8 +80,9 @@ const ManagerDashboard = () => {
 
   const addTask = async (task) => {
     try {
+      const token = localStorage.getItem('accessToken'); // Correctly fetch the accessToken from localStorage
       const response = await axios.post(`${API_BASE_URL}/api/tasks`, task, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${token}` }
       });
       setTasks([...tasks, response.data]);
       setShowForm(false);

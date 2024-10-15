@@ -37,7 +37,6 @@ const Task = {
     });
   },
 
-  
   getAll: (callback) => {
     const sql = 'SELECT * FROM tasks';
     db.query(sql, callback);
@@ -109,13 +108,23 @@ const Task = {
     });
   },
 
-  // Other methods...
-
-
   updateStatus: (taskId, status, callback) => {
     const sql = 'UPDATE tasks SET status = ? WHERE task_id = ?';
     console.log(`Executing SQL: ${sql} with status: ${status} and taskId: ${taskId}`); // Log the SQL query and parameters
     db.query(sql, [status, taskId], (err, result) => {
+      if (err) {
+        console.error('Error executing SQL:', err); // Log the error
+        return callback(err);
+      }
+      console.log(`SQL execution result:`, result); // Log the result
+      callback(null, result);
+    });
+  },
+
+  updateTargetDate: (taskId, targetDate, callback) => {
+    const sql = 'UPDATE tasks SET target_date = ? WHERE task_id = ?';
+    console.log(`Executing SQL: ${sql} with targetDate: ${targetDate} and taskId: ${taskId}`); // Log the SQL query and parameters
+    db.query(sql, [targetDate, taskId], (err, result) => {
       if (err) {
         console.error('Error executing SQL:', err); // Log the error
         return callback(err);
@@ -140,13 +149,29 @@ const Task = {
       GROUP BY t.task_id
     `;
     db.query(sql, callback);
+  },
+
+  getTasksForManager: (managerId, subDepartmentId, callback) => {
+    const sql = `
+      SELECT t.*, 
+             GROUP_CONCAT(DISTINCT u.name) AS assignees, 
+             GROUP_CONCAT(DISTINCT sd.sub_department_name) AS sub_departments,
+             creator.name AS created_by_name
+      FROM tasks t
+      LEFT JOIN task_assignees ta ON t.task_id = ta.task_id
+      LEFT JOIN users u ON ta.user_id = u.user_id
+      LEFT JOIN task_sub_departments tsd ON t.task_id = tsd.task_id
+      LEFT JOIN sub_departments sd ON tsd.sub_department_id = sd.sub_department_id
+      LEFT JOIN users creator ON t.created_by = creator.user_id
+      WHERE ta.user_id = ? OR t.created_by = ? OR tsd.sub_department_id = ?
+      GROUP BY t.task_id
+    `;
+    db.query(sql, [managerId, managerId, subDepartmentId], callback);
   }
 
 
 
-
 };
-
 
 
 

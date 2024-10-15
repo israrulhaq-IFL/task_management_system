@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Form, Button } from 'react-bootstrap';
 import axios from 'axios';
 import PropTypes from 'prop-types';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
@@ -13,6 +15,7 @@ const TaskForm = ({ addTask, role }) => {
     const [assignedTo, setAssignedTo] = useState([]);
     const [users, setUsers] = useState([]);
     const [user, setUser] = useState(null);
+    const [targetDate, setTargetDate] = useState(new Date());
 
     useEffect(() => {
         const user_id = localStorage.getItem('user_id');
@@ -27,7 +30,6 @@ const TaskForm = ({ addTask, role }) => {
                     };
                     const response = await axios.get(`${API_BASE_URL}/api/users/${user_id}`, config);
                     const userDetails = response.data;
-                    console.log('Fetched user details:', userDetails); // Debugging log
                     setUser(userDetails);
                 } catch (error) {
                     console.error('Error fetching user details:', error);
@@ -43,7 +45,6 @@ const TaskForm = ({ addTask, role }) => {
             const fetchUsers = async () => {
                 try {
                     const token = localStorage.getItem('accessToken');
-                    console.log('Token:', token); // Debugging log
                     const config = {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -51,7 +52,6 @@ const TaskForm = ({ addTask, role }) => {
                         }
                     };
                     let response;
-                    console.log('Role:', role); // Debugging log
                     if (role === 'Manager') {
                         response = await axios.get(`${API_BASE_URL}/api/users/manager?manager_id=${user.user_id}`, config);
                     } else if (role === 'team-member') {
@@ -59,8 +59,6 @@ const TaskForm = ({ addTask, role }) => {
                     } else if (role === 'hod') {
                         response = await axios.get(`${API_BASE_URL}/api/users/hod`, config);
                     }
-                    console.log('Fetched users response:', response); // Debugging log
-                    console.log('Response data:', response.data); // Detailed log
                     if (response && response.data && response.data.users) {
                         setUsers(response.data.users);
                     } else {
@@ -81,12 +79,13 @@ const TaskForm = ({ addTask, role }) => {
         const department_id = user.department_id;
         const sub_department_ids = assignedTo.map(assignee => assignee.sub_department_id);
 
-        addTask({ title, description, priority, status, assigned_to: assignedTo, created_by, department_id, sub_department_ids });
+        addTask({ title, description, priority, status, assigned_to: assignedTo, created_by, department_id, sub_department_ids, target_date: targetDate.toISOString().split('T')[0] });
         setTitle('');
         setDescription('');
         setStatus('pending');
         setPriority('medium');
         setAssignedTo([]);
+        setTargetDate(new Date());
     };
 
     const handleAssigneeChange = (e) => {
@@ -153,6 +152,10 @@ const TaskForm = ({ addTask, role }) => {
                         <option key={user.user_id} value={JSON.stringify(user)}>{user.name}</option>
                     ))}
                 </Form.Control>
+            </Form.Group>
+            <Form.Group controlId="formTargetDate">
+                <Form.Label>Target Date:</Form.Label>
+                <DatePicker selected={targetDate} onChange={date => setTargetDate(date)} />
             </Form.Group>
             <Button variant="primary" type="submit">
                 Add Task
