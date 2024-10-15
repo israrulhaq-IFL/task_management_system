@@ -123,12 +123,12 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
             <Card.Text>
               <strong>Status:</strong> {task.status}
             </Card.Text>
-            <Card.Text>
+            <div>
               <strong>Target Date:</strong>
               <div ref={datePickerWrapperRef}>
                 <DatePicker selected={targetDate} onChange={handleTargetDateChange} disabled={!isAssignedToUser} />
               </div>
-            </Card.Text>
+            </div>
             <Dropdown onToggle={() => setShowMenu(!showMenu)} show={showMenu} className="task-card-dropdown">
               <Dropdown.Toggle variant="link" id="dropdown-basic" className="task-card-dropdown-toggle">
                 {/* Dropdown Toggle Content */}

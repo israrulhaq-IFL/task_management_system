@@ -1,18 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import TaskList from '../components/TaskList';
-import { Button, Modal, Alert } from 'react-bootstrap';
+import { Button, Modal, Alert, Tabs, Tab } from 'react-bootstrap';
 import TaskForm from '../components/TaskForm';
 import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
 const ManagerDashboard = () => {
-  const [tasks, setTasks] = useState([]);
+  const [tasksAssignedToMe, setTasksAssignedToMe] = useState([]);
+  const [tasksAssignedToTeam, setTasksAssignedToTeam] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState('');
   const [role, setRole] = useState('');
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userId = localStorage.getItem('user_id');
+        const token = localStorage.getItem('accessToken');
+        if (!userId) {
+          setError('User ID is missing.');
+          return;
+        }
+
+        const response = await axios.get(`${API_BASE_URL}/api/users/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUser(response.data);
+      } catch (error) {
+        console.error('There was an error fetching the user data!', error);
+        setError('User information is missing.');
+      }
+    };
+
     const fetchTasks = async () => {
       try {
         const token = localStorage.getItem('accessToken'); // Correctly fetch the accessToken from localStorage
@@ -21,7 +42,12 @@ const ManagerDashboard = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
         console.log('Fetched tasks:', response.data); // Log the fetched tasks
-        setTasks(response.data);
+
+        const tasks = response.data;
+        const tasksAssignedToMe = tasks.filter(task => task.assignees.includes(user?.name));
+        const tasksAssignedToTeam = tasks.filter(task => !task.assignees.includes(user?.name));
+        setTasksAssignedToMe(tasksAssignedToMe);
+        setTasksAssignedToTeam(tasksAssignedToTeam);
       } catch (error) {
         console.error('There was an error fetching the tasks!', error);
         if (error.response) {
@@ -31,12 +57,12 @@ const ManagerDashboard = () => {
       }
     };
 
-    fetchTasks();
+    fetchUser().then(fetchTasks);
 
     // Fetch role from local storage or API
     const userRole = localStorage.getItem('role'); // Assuming role is stored in local storage
     setRole(userRole);
-  }, []);
+  }, [user?.name]);
 
   const handleStatusChange = async (id, newStatus) => {
     try {
@@ -50,7 +76,8 @@ const ManagerDashboard = () => {
       await axios.put(`${API_BASE_URL}/api/tasks/${id}/status`, { status: newStatus }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setTasks(tasks.map(task => task.task_id === id ? { ...task, status: newStatus } : task));
+      setTasksAssignedToMe(tasksAssignedToMe.map(task => task.task_id === id ? { ...task, status: newStatus } : task));
+      setTasksAssignedToTeam(tasksAssignedToTeam.map(task => task.task_id === id ? { ...task, status: newStatus } : task));
     } catch (error) {
       console.error('There was an error updating the task status!', error);
       if (error.response) {
@@ -68,7 +95,8 @@ const ManagerDashboard = () => {
       await axios.delete(`${API_BASE_URL}/api/tasks/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setTasks(tasks.filter(task => task.task_id !== id));
+      setTasksAssignedToMe(tasksAssignedToMe.filter(task => task.task_id !== id));
+      setTasksAssignedToTeam(tasksAssignedToTeam.filter(task => task.task_id !== id));
     } catch (error) {
       console.error('There was an error deleting the task!', error);
       if (error.response) {
@@ -84,7 +112,7 @@ const ManagerDashboard = () => {
       const response = await axios.post(`${API_BASE_URL}/api/tasks`, task, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setTasks([...tasks, response.data]);
+      setTasksAssignedToMe([...tasksAssignedToMe, response.data]);
       setShowForm(false);
     } catch (error) {
       console.error('There was an error adding the task!', error);
@@ -102,7 +130,14 @@ const ManagerDashboard = () => {
         <Button variant="primary" onClick={() => setShowForm(true)}>Add Task</Button>
       </div>
       {error && <Alert variant="danger">{error}</Alert>}
-      <TaskList tasks={tasks} onDelete={handleDelete} onStatusChange={handleStatusChange} />
+      <Tabs defaultActiveKey="my-tasks" id="task-tabs">
+        <Tab eventKey="my-tasks" title="My Tasks">
+          <TaskList tasks={tasksAssignedToMe} onDelete={handleDelete} onStatusChange={handleStatusChange} user={user} canDragAndDrop={true} />
+        </Tab>
+        <Tab eventKey="other-tasks" title="Other Team Tasks">
+          <TaskList tasks={tasksAssignedToTeam} onDelete={handleDelete} onStatusChange={handleStatusChange} user={user} canDragAndDrop={false} />
+        </Tab>
+      </Tabs>
       <Modal show={showForm} onHide={() => setShowForm(false)}>
         <Modal.Header closeButton>
           <Modal.Title>Add Task</Modal.Title>

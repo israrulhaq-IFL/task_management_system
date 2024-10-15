@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import TaskList from '../components/TaskList';
-import { Alert } from 'react-bootstrap';
+import { Alert, Tabs, Tab } from 'react-bootstrap';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
@@ -71,10 +71,14 @@ const TeamMemberDashboard = ({ user }) => {
     <div>
       <h2>Team Member Dashboard</h2>
       {error && <Alert variant="danger">{error}</Alert>}
-      <h3>Tasks Assigned to Me</h3>
-      <TaskList tasks={tasksAssignedToMe} onDelete={handleDelete} onStatusChange={handleStatusChange} user={user} canDragAndDrop={true} />
-      <h3>Tasks Assigned to Others in My Sub-Department</h3>
-      <TaskList tasks={tasksAssignedToOthers} onDelete={handleDelete} onStatusChange={handleStatusChange} user={user} canDragAndDrop={false} />
+      <Tabs defaultActiveKey="my-tasks" id="task-tabs">
+        <Tab eventKey="my-tasks" title="My Tasks">
+          <TaskList tasks={tasksAssignedToMe} onDelete={handleDelete} onStatusChange={handleStatusChange} user={user} canDragAndDrop={true} />
+        </Tab>
+        <Tab eventKey="other-tasks" title="Other Tasks in my dept">
+          <TaskList tasks={tasksAssignedToOthers} onDelete={handleDelete} onStatusChange={handleStatusChange} user={user} canDragAndDrop={false} />
+        </Tab>
+      </Tabs>
     </div>
   );
 };
