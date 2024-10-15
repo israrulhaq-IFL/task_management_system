@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import TaskCard from './TaskCard';
-import { Badge } from 'react-bootstrap';
+import { Badge, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { Eye } from 'react-bootstrap-icons';
 import './TaskList.css'; // Import the CSS file
 
 const ItemTypes = {
@@ -10,14 +11,19 @@ const ItemTypes = {
 };
 
 const TaskList = ({ tasks, onDelete, onStatusChange }) => {
-  const [taskList, setTaskList] = useState(tasks);
+  const [taskList, setTaskList] = useState([]);
+  const [hiddenPendingTasks, setHiddenPendingTasks] = useState([]);
+  const [hiddenInProgressTasks, setHiddenInProgressTasks] = useState([]);
+  const [hiddenCompletedTasks, setHiddenCompletedTasks] = useState([]);
   const [expandedPendingTaskId, setExpandedPendingTaskId] = useState(null);
   const [expandedInProgressTaskId, setExpandedInProgressTaskId] = useState(null);
   const [expandedCompletedTaskId, setExpandedCompletedTaskId] = useState(null);
 
   useEffect(() => {
     console.log('TaskList received tasks:', tasks); // Log the received tasks
-    setTaskList(tasks);
+    // Sort tasks by created_at date in descending order
+    const sortedTasks = [...tasks].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    setTaskList(sortedTasks);
   }, [tasks]);
 
   const handleStatusChange = (taskId, newStatus) => {
@@ -39,6 +45,26 @@ const TaskList = ({ tasks, onDelete, onStatusChange }) => {
     handleStatusChange(taskId, newStatus);
   };
 
+  const handleHideTask = (taskId, status) => {
+    if (status === 'pending') {
+      setHiddenPendingTasks([...hiddenPendingTasks, taskId]);
+    } else if (status === 'in progress') {
+      setHiddenInProgressTasks([...hiddenInProgressTasks, taskId]);
+    } else if (status === 'completed') {
+      setHiddenCompletedTasks([...hiddenCompletedTasks, taskId]);
+    }
+  };
+
+  const handleUnhideAllTasks = (status) => {
+    if (status === 'pending') {
+      setHiddenPendingTasks([]);
+    } else if (status === 'in progress') {
+      setHiddenInProgressTasks([]);
+    } else if (status === 'completed') {
+      setHiddenCompletedTasks([]);
+    }
+  };
+
   const Task = ({ task, index, status }) => {
     const [, ref] = useDrag({
       type: ItemTypes.TASK,
@@ -53,6 +79,7 @@ const TaskList = ({ tasks, onDelete, onStatusChange }) => {
           onStatusChange={handleStatusChange}
           isExpanded={status === 'pending' ? expandedPendingTaskId === task.task_id : status === 'in progress' ? expandedInProgressTaskId === task.task_id : expandedCompletedTaskId === task.task_id}
           onExpand={() => handleExpand(task.task_id, status)}
+          onHide={(taskId) => handleHideTask(taskId, status)}
         />
       </div>
     );
@@ -64,20 +91,27 @@ const TaskList = ({ tasks, onDelete, onStatusChange }) => {
       drop: (item) => moveTask(item.taskId, status),
     });
 
+    const hiddenTasks = status === 'pending' ? hiddenPendingTasks : status === 'in progress' ? hiddenInProgressTasks : hiddenCompletedTasks;
+
     return (
       <div ref={ref} className="task-column">
         <div className="task-column-header">
           <h3>{status.charAt(0).toUpperCase() + status.slice(1)}</h3>
           <Badge pill className={`task-count ${status.replace(' ', '-')} shadow-sm`}>{children.length}</Badge>
+          <OverlayTrigger placement="top" overlay={<Tooltip>Unhide All</Tooltip>}>
+            <Button variant="link" onClick={() => handleUnhideAllTasks(status)} disabled={hiddenTasks.length === 0}>
+              <Eye />
+            </Button>
+          </OverlayTrigger>
         </div>
         {children}
       </div>
     );
   };
 
-  const pendingTasks = taskList.filter(task => task.status === 'pending');
-  const inProgressTasks = taskList.filter(task => task.status === 'in progress');
-  const completedTasks = taskList.filter(task => task.status === 'completed');
+  const pendingTasks = taskList.filter(task => task.status === 'pending' && !hiddenPendingTasks.includes(task.task_id));
+  const inProgressTasks = taskList.filter(task => task.status === 'in progress' && !hiddenInProgressTasks.includes(task.task_id));
+  const completedTasks = taskList.filter(task => task.status === 'completed' && !hiddenCompletedTasks.includes(task.task_id));
 
   return (
     <DndProvider backend={HTML5Backend}>

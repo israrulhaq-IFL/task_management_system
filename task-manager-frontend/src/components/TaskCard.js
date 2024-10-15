@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { Card, Button, Form, Dropdown, Modal } from 'react-bootstrap';
-import { Trash } from 'react-bootstrap-icons';
+import { Card, Button, Form, Dropdown, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Trash, EyeSlash } from 'react-bootstrap-icons';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './TaskCard.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
-const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand }) => {
+const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [statusDotColor, setStatusDotColor] = useState('');
@@ -45,7 +45,7 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand }) => {
     const newStatus = event.target.value;
     try {
       await axios.put(`${API_BASE_URL}/api/tasks/${task.task_id}/status`, { status: newStatus }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accesstoken')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
       });
       onStatusChange(task.task_id, newStatus);
     } catch (error) {
@@ -57,7 +57,7 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand }) => {
     setTargetDate(date);
     try {
       await axios.put(`${API_BASE_URL}/api/tasks/${task.task_id}/target-date`, { target_date: date.toISOString().split('T')[0] }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accesstoken')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
       });
     } catch (error) {
       console.error('There was an error updating the task target date!', error);
@@ -74,6 +74,10 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand }) => {
   const confirmDelete = () => {
     onDelete(task.task_id);
     setShowModal(false);
+  };
+
+  const handleHide = () => {
+    onHide(task.task_id);
   };
 
   const handleCardClick = (e) => {
@@ -95,7 +99,7 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand }) => {
           <strong></strong> {new Date(task.created_at).toLocaleString()}
         </Card.Text>
         <Card.Title className="task-card-title">{task.title || 'Untitled Task'}</Card.Title>
-        <Card.Text className="task-card-description">{task.description}</Card.Text>
+        <Card.Text className="task-card-description" dangerouslySetInnerHTML={{ __html: task.description }}></Card.Text>
         <Card.Text className="task-card-created-by">
           <strong>By:</strong> {task.created_by_name}
         </Card.Text>
@@ -123,6 +127,11 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand }) => {
               <Dropdown.Menu>
                 <Dropdown.Item onClick={handleDelete} className="task-card-delete-button">
                   <Trash /> Delete
+                </Dropdown.Item>
+                <Dropdown.Item onClick={handleHide} className="task-card-hide-button">
+                  <OverlayTrigger placement="top" overlay={<Tooltip>Hide Task</Tooltip>}>
+                    <EyeSlash />
+                  </OverlayTrigger>
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>

@@ -4,6 +4,8 @@ import axios from 'axios';
 import PropTypes from 'prop-types';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
@@ -109,11 +111,10 @@ const TaskForm = ({ addTask, role }) => {
             </Form.Group>
             <Form.Group controlId="formDescription">
                 <Form.Label>Description:</Form.Label>
-                <Form.Control
-                    as="textarea"
-                    rows={3}
+                <ReactQuill
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                    onChange={setDescription}
+                    theme="snow"
                 />
             </Form.Group>
             <Form.Group controlId="formStatus">
