@@ -4,6 +4,11 @@ const taskController = require('../controllers/taskController');
 const authMiddleware = require('../middleware/authMiddleware');
 
 
+router.post('/interactions', authMiddleware, taskController.logInteraction);
+router.get('/interactions/:taskId', authMiddleware, taskController.getInteractionsByTaskId);
+router.put('/:Id/target-date', authMiddleware, taskController.updateTaskTargetDate);
+
+
 router.get('/manager', authMiddleware, taskController.getTasksForManager);
 router.get('/team-member', authMiddleware, taskController.getTasksForTeamMember);
 router.put('/:id/status', taskController.updateTaskStatus);

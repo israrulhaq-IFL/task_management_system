@@ -180,6 +180,13 @@ exports.updateTaskTargetDate = (req, res) => {
   const { target_date } = req.body;
 
   console.log(`updateTaskTargetDate route triggered for task ${taskId}`); // Log the route trigger
+  console.log(`Received target_date: ${target_date}`); // Log the received target date
+
+  // Validate target_date
+  if (!target_date) {
+    console.error('No target_date provided'); // Log missing target date
+    return res.status(400).json({ error: 'target_date is required' });
+  }
 
   console.log(`Updating task ${taskId} to target date ${target_date}`); // Log the task ID and new target date
 
@@ -190,7 +197,7 @@ exports.updateTaskTargetDate = (req, res) => {
       return res.status(500).json({ error: 'Internal server error' });
     }
     if (result.affectedRows === 0) {
-      console.error(`Task not found: ${taskId}`); // Log task not found
+      console.error(`No task found with ID ${taskId}`); // Log no task found
       return res.status(404).json({ error: 'Task not found' });
     }
     console.log(`Task ${taskId} target date updated to ${target_date}`); // Log successful update
@@ -234,6 +241,40 @@ exports.getTasksForTeamMember = (req, res) => {
     if (err) {
       console.error('Error fetching tasks for team member:', err); // Log the error
       return res.status(500).json({ error: 'Error fetching tasks for team member' });
+    }
+    res.status(200).json(result);
+  });
+};
+
+
+exports.logInteraction = (req, res) => {
+  console.log('log interaction hit , Request body:', req.body); // Log the request body
+  const { taskId, interactionType, interactionDetail } = req.body;
+  const userId = req.user.user_id; // Assuming user ID is available in req.user
+
+  const interactionData = {
+    user_id: userId,
+    task_id: taskId,
+    interaction_type: interactionType,
+    interaction_detail: interactionDetail
+  };
+
+  Task.logInteraction(interactionData, (err, result) => {
+    if (err) {
+      console.error('Error logging interaction:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+    res.status(201).json({ message: 'Interaction logged successfully' });
+  });
+};
+
+exports.getInteractionsByTaskId = (req, res) => {
+  const taskId = req.params.taskId;
+
+  Task.getInteractionsByTaskId(taskId, (err, result) => {
+    if (err) {
+      console.error('Error fetching interactions:', err);
+      return res.status(500).json({ error: 'Internal server error' });
     }
     res.status(200).json(result);
   });

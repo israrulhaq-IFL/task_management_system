@@ -11,14 +11,9 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:300
 const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide, user }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [statusDotColor, setStatusDotColor] = useState('');
   const [targetDate, setTargetDate] = useState(new Date(task.target_date));
   const cardRef = useRef(null);
-  const datePickerWrapperRef = useRef(null); // Add a ref for the date picker wrapper
-
-  useEffect(() => {
-    updateStatusDotColor(task.status);
-  }, [task.status]);
+  const datePickerWrapperRef = useRef(null);
 
   useEffect(() => {
     if (isExpanded) {
@@ -28,19 +23,6 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
     }
   }, [isExpanded]);
 
-  const updateStatusDotColor = (status) => {
-    if (status === 'pending') {
-      setStatusDotColor('blue');
-    } else if (status === 'in progress') {
-      setStatusDotColor('orange');
-    } else if (status === 'completed') {
-      setStatusDotColor('green');
-      setTimeout(() => {
-        setStatusDotColor('dim');
-      }, 5000);
-    }
-  };
-
   const handleStatusChange = async (event) => {
     const newStatus = event.target.value;
     try {
@@ -48,6 +30,7 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
       });
       onStatusChange(task.task_id, newStatus);
+      logInteraction('status_change', newStatus);
     } catch (error) {
       console.error('There was an error updating the task status!', error);
     }
@@ -56,11 +39,27 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
   const handleTargetDateChange = async (date) => {
     setTargetDate(date);
     try {
-      await axios.put(`${API_BASE_URL}/api/tasks/${task.task_id}/target-date`, { target_date: date.toISOString().split('T')[0] }, {
+      const response = await axios.put(`${API_BASE_URL}/api/tasks/${task.task_id}/target-date`, { target_date: date.toISOString().split('T')[0] }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+      });
+      console.log('Target date update response:', response.data); // Log the response
+      logInteraction('target_date_change', date.toISOString().split('T')[0]);
+    } catch (error) {
+      console.error('There was an error updating the task target date!', error);
+    }
+  };
+
+  const logInteraction = async (interactionType, interactionDetail) => {
+    try {
+      await axios.post(`${API_BASE_URL}/api/tasks/interactions`, {
+        taskId: task.task_id,
+        interactionType,
+        interactionDetail
+      }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
       });
     } catch (error) {
-      console.error('There was an error updating the task target date!', error);
+      console.error('Error logging interaction:', error);
     }
   };
 
@@ -74,10 +73,12 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
   const confirmDelete = () => {
     onDelete(task.task_id);
     setShowModal(false);
+    logInteraction('delete', 'Task deleted');
   };
 
   const handleHide = () => {
     onHide(task.task_id);
+    logInteraction('hide', 'Task hidden');
   };
 
   const handleCardClick = (e) => {
@@ -89,13 +90,13 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
       return;
     }
     onExpand();
+    logInteraction('expand', 'Task expanded');
   };
 
   const isAssignedToUser = user ? assignees.includes(user.name) : false;
 
   return (
     <Card className={`mb-3 task-card ${isExpanded ? 'expanded' : ''}`} onClick={handleCardClick} ref={cardRef}>
-      <div className={`status-dot ${statusDotColor}`}></div>
       {!isExpanded && (
         <OverlayTrigger placement="top" overlay={<Tooltip>Hide Task</Tooltip>}>
           <Button variant="link" className="task-card-hide-button-top-right" onClick={handleHide}>

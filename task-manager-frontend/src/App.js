@@ -13,8 +13,10 @@ import UserManagement from './pages/UserManagement'; // Import the UserManagemen
 import LoginForm from './components/LoginForm';
 import RegisterForm from './components/RegisterForm';
 import { Container, Row, Col } from 'react-bootstrap';
-import {jwtDecode} from 'jwt-decode'; // Corrected import statement
+import { jwtDecode } from 'jwt-decode'; // Corrected import statement
 import withRole from './hoc/withRole'; // Import the withRole HOC
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
@@ -93,17 +95,13 @@ function App() {
   const handleLogin = (accessToken) => {
     setToken(accessToken);
     localStorage.setItem('accessToken', accessToken);
-   
-    
   };
-
 
   useEffect(() => {
     if (token) {
       fetchUserInfo();
     }
   }, [token, fetchUserInfo]);
-
 
   const handleLogout = () => {
     const token = localStorage.getItem('accessToken');
@@ -159,44 +157,46 @@ function App() {
   };
 
   return (
-    <Layout handleLogout={handleLogout} isLoggedIn={!!token} userRole={user.role}>
-      <Container>
-        <Row className="justify-content-center mt-5">
-          <Col xs={12} md={10} lg={8}>
-            {token ? (
-              <>
-                {user.role === 'Super Admin' ? (
-                  <Routes>
-                    <Route path="/dashboard" element={<SuperAdminDashboard />} />
-                    <Route path="/departments" element={<DepartmentManagementWithRole />} />
-                    <Route path="/sub-departments" element={<SubDepartmentManagementWithRole />} />
-                    <Route path="/user-management" element={<UserManagementWithRole />} />
-                    <Route path="*" element={<Navigate to="/dashboard" />} />
-                  </Routes>
-                ) : (
-                  user.department_id && user.sub_department_id ? (
+    <DndProvider backend={HTML5Backend}>
+      <Layout handleLogout={handleLogout} isLoggedIn={!!token} userRole={user.role}>
+        <Container>
+          <Row className="justify-content-center mt-5">
+            <Col xs={12} md={10} lg={8}>
+              {token ? (
+                <>
+                  {user.role === 'Super Admin' ? (
                     <Routes>
-                      <Route path="/dashboard" element={renderDashboard()} />
+                      <Route path="/dashboard" element={<SuperAdminDashboard />} />
+                      <Route path="/departments" element={<DepartmentManagementWithRole />} />
+                      <Route path="/sub-departments" element={<SubDepartmentManagementWithRole />} />
+                      <Route path="/user-management" element={<UserManagementWithRole />} />
                       <Route path="*" element={<Navigate to="/dashboard" />} />
                     </Routes>
                   ) : (
-                    <div>
-                      <p>Please wait until you are assigned to a team.</p>
-                    </div>
-                  )
-                )}
-              </>
-            ) : (
-              <Routes>
-                <Route path="/login" element={<LoginForm onLogin={handleLogin} />} />
-                <Route path="/register" element={<RegisterForm onRegister={handleRegisterSuccess} />} />
-                <Route path="/" element={<Navigate to="/login" />} />
-              </Routes>
-            )}
-          </Col>
-        </Row>
-      </Container>
-    </Layout>
+                    user.department_id && user.sub_department_id ? (
+                      <Routes>
+                        <Route path="/dashboard" element={renderDashboard()} />
+                        <Route path="*" element={<Navigate to="/dashboard" />} />
+                      </Routes>
+                    ) : (
+                      <div>
+                        <p>Please wait until you are assigned to a team.</p>
+                      </div>
+                    )
+                  )}
+                </>
+              ) : (
+                <Routes>
+                  <Route path="/login" element={<LoginForm onLogin={handleLogin} />} />
+                  <Route path="/register" element={<RegisterForm onRegister={handleRegisterSuccess} />} />
+                  <Route path="/" element={<Navigate to="/login" />} />
+                </Routes>
+              )}
+            </Col>
+          </Row>
+        </Container>
+      </Layout>
+    </DndProvider>
   );
 }
 

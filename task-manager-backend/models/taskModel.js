@@ -185,8 +185,19 @@ const Task = {
     GROUP BY t.task_id
     `;
     db.query(sql, [subDepartmentId, userId], callback);
-  }
+  },
 
+
+  logInteraction: (interactionData, callback) => {
+    console.log('log interaction model hit Interaction data:', interactionData);
+    const sql = 'INSERT INTO UserInteractions SET ?';
+    db.query(sql, interactionData, callback);
+  },
+
+  getInteractionsByTaskId: (taskId, callback) => {
+    const sql = 'SELECT * FROM UserInteractions WHERE task_id = ? ORDER BY interaction_timestamp';
+    db.query(sql, [taskId], callback);
+  }
 
 };
 
