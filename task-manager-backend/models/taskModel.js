@@ -167,8 +167,25 @@ const Task = {
       GROUP BY t.task_id
     `;
     db.query(sql, [managerId, managerId, subDepartmentId], callback);
-  }
+  },
 
+  getTasksForTeamMember: (userId, subDepartmentId, callback) => {
+    const sql = `
+     SELECT t.*, 
+           GROUP_CONCAT(DISTINCT u.name) AS assignees, 
+           GROUP_CONCAT(DISTINCT sd.sub_department_name) AS sub_departments,
+           creator.name AS created_by_name
+    FROM tasks t
+    LEFT JOIN task_assignees ta ON t.task_id = ta.task_id
+    LEFT JOIN users u ON ta.user_id = u.user_id
+    LEFT JOIN task_sub_departments tsd ON t.task_id = tsd.task_id
+    LEFT JOIN sub_departments sd ON tsd.sub_department_id = sd.sub_department_id
+    LEFT JOIN users creator ON t.created_by = creator.user_id
+    WHERE tsd.sub_department_id = ?
+    GROUP BY t.task_id
+    `;
+    db.query(sql, [subDepartmentId, userId], callback);
+  }
 
 
 };

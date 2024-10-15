@@ -5,6 +5,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 
 
 router.get('/manager', authMiddleware, taskController.getTasksForManager);
+router.get('/team-member', authMiddleware, taskController.getTasksForTeamMember);
 router.put('/:id/status', taskController.updateTaskStatus);
 router.post('/', taskController.createTask);
 router.get('/:id', taskController.getTaskById);

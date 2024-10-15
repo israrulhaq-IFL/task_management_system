@@ -10,7 +10,7 @@ const ItemTypes = {
   TASK: 'task',
 };
 
-const TaskList = ({ tasks, onDelete, onStatusChange }) => {
+const TaskList = ({ tasks, onDelete, onStatusChange, user, canDragAndDrop }) => {
   const [taskList, setTaskList] = useState([]);
   const [hiddenPendingTasks, setHiddenPendingTasks] = useState([]);
   const [hiddenInProgressTasks, setHiddenInProgressTasks] = useState([]);
@@ -69,10 +69,11 @@ const TaskList = ({ tasks, onDelete, onStatusChange }) => {
     const [, ref] = useDrag({
       type: ItemTypes.TASK,
       item: { taskId: task.task_id, status },
+      canDrag: canDragAndDrop, // Disable drag if canDragAndDrop is false
     });
 
     return (
-      <div ref={ref}>
+      <div ref={canDragAndDrop ? ref : null}>
         <TaskCard
           task={task}
           onDelete={onDelete}
@@ -80,6 +81,7 @@ const TaskList = ({ tasks, onDelete, onStatusChange }) => {
           isExpanded={status === 'pending' ? expandedPendingTaskId === task.task_id : status === 'in progress' ? expandedInProgressTaskId === task.task_id : expandedCompletedTaskId === task.task_id}
           onExpand={() => handleExpand(task.task_id, status)}
           onHide={(taskId) => handleHideTask(taskId, status)}
+          user={user} // Pass the user prop to TaskCard
         />
       </div>
     );
@@ -91,7 +93,7 @@ const TaskList = ({ tasks, onDelete, onStatusChange }) => {
       drop: (item) => moveTask(item.taskId, status),
     });
 
-    const hiddenTasks = status === 'pending' ? hiddenPendingTasks : status === 'in progress' ? hiddenInProgressTasks : hiddenCompletedTasks;
+    const hiddenTasks = status === 'pending' ? hiddenPendingTasks : status === 'in progress' ? hiddenInProgressTasks : status === 'completed' ? hiddenCompletedTasks : [];
 
     return (
       <div ref={ref} className="task-column">

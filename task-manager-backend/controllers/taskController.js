@@ -218,3 +218,23 @@ exports.getTasksForManager = (req, res) => {
     res.status(200).json(result);
   });
 };
+
+exports.getTasksForTeamMember = (req, res) => {
+  console.log('Request user data:', req.user); // Log the req.user object
+
+  if (!req.user) {
+    return res.status(401).json({ error: 'User not authenticated' });
+  }
+
+  const userId = req.user.user_id; // Use id instead of user_id
+  const subDepartmentId = req.user.sub_department_id; // Assuming sub-department ID is available in req.user
+
+  Task.getTasksForTeamMember(userId, subDepartmentId, (err, result) => {
+    console.log('Fetching tasks for team member:', userId); // Log the user ID
+    if (err) {
+      console.error('Error fetching tasks for team member:', err); // Log the error
+      return res.status(500).json({ error: 'Error fetching tasks for team member' });
+    }
+    res.status(200).json(result);
+  });
+};

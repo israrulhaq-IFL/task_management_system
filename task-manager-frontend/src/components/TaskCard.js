@@ -8,7 +8,7 @@ import './TaskCard.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
-const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide }) => {
+const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide, user }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [statusDotColor, setStatusDotColor] = useState('');
@@ -91,6 +91,8 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
     onExpand();
   };
 
+  const isAssignedToUser = user ? assignees.includes(user.name) : false;
+
   return (
     <Card className={`mb-3 task-card ${isExpanded ? 'expanded' : ''}`} onClick={handleCardClick} ref={cardRef}>
       <div className={`status-dot ${statusDotColor}`}></div>
@@ -124,7 +126,7 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
             <Card.Text>
               <strong>Target Date:</strong>
               <div ref={datePickerWrapperRef}>
-                <DatePicker selected={targetDate} onChange={handleTargetDateChange} />
+                <DatePicker selected={targetDate} onChange={handleTargetDateChange} disabled={!isAssignedToUser} />
               </div>
             </Card.Text>
             <Dropdown onToggle={() => setShowMenu(!showMenu)} show={showMenu} className="task-card-dropdown">
@@ -132,21 +134,27 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
                 {/* Dropdown Toggle Content */}
               </Dropdown.Toggle>
               <Dropdown.Menu>
-                <Dropdown.Item onClick={handleDelete} className="task-card-delete-button">
-                  <Trash /> Delete
-                </Dropdown.Item>
-                <Dropdown.Item onClick={handleHide} className="task-card-hide-button">
-                  <OverlayTrigger placement="top" overlay={<Tooltip>Hide Task</Tooltip>}>
-                    <EyeSlash />
-                  </OverlayTrigger>
-                </Dropdown.Item>
+                {isAssignedToUser && (
+                  <>
+                    <Dropdown.Item onClick={handleDelete} className="task-card-delete-button">
+                      <Trash /> Delete
+                    </Dropdown.Item>
+                    <Dropdown.Item onClick={handleHide} className="task-card-hide-button">
+                      <OverlayTrigger placement="top" overlay={<Tooltip>Hide Task</Tooltip>}>
+                        <EyeSlash />
+                      </OverlayTrigger>
+                    </Dropdown.Item>
+                  </>
+                )}
               </Dropdown.Menu>
             </Dropdown>
-            <Form.Control as="select" value={task.status} onChange={handleStatusChange} className="mt-2 task-card-status-dropdown">
-              <option value="pending">Pending</option>
-              <option value="in progress">In Progress</option>
-              <option value="completed">Completed</option>
-            </Form.Control>
+            {isAssignedToUser && (
+              <Form.Control as="select" value={task.status} onChange={handleStatusChange} className="mt-2 task-card-status-dropdown">
+                <option value="pending">Pending</option>
+                <option value="in progress">In Progress</option>
+                <option value="completed">Completed</option>
+              </Form.Control>
+            )}
           </>
         )}
       </Card.Body>
