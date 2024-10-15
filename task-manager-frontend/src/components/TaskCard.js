@@ -94,6 +94,13 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
   return (
     <Card className={`mb-3 task-card ${isExpanded ? 'expanded' : ''}`} onClick={handleCardClick} ref={cardRef}>
       <div className={`status-dot ${statusDotColor}`}></div>
+      {!isExpanded && (
+        <OverlayTrigger placement="top" overlay={<Tooltip>Hide Task</Tooltip>}>
+          <Button variant="link" className="task-card-hide-button-top-right" onClick={handleHide}>
+            <EyeSlash />
+          </Button>
+        </OverlayTrigger>
+      )}
       <Card.Body>
         <Card.Text>
           <strong></strong> {new Date(task.created_at).toLocaleString()}

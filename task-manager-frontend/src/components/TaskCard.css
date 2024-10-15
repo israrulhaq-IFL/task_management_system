@@ -4,12 +4,10 @@
   transition: max-height 0.5s ease;
   overflow: hidden;
   max-height: 150px; /* Adjust based on the initial content height */
-
   width: 350px; /* Fixed width for all task cards */
 }
 
 .task-card.expanded {
-
   max-height: none; /* Allow the card to expand to fit content */
   overflow: visible; /* Ensure all content is visible */
 }
@@ -93,4 +91,17 @@
 
 .task-card-delete-button svg {
   margin-right: 5px;
+}
+
+/* New styles for the hide button at the top right */
+.task-card-hide-button-top-right {
+  position: absolute;
+  top: 10px;
+  right: 40px; /* Adjusted to avoid overlap with the status dot */
+  z-index: 1;
+  font-size: 1.2rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #6c757d;
 }
