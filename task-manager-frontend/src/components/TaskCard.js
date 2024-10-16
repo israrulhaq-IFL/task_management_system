@@ -98,7 +98,7 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
   };
 
   const isAssignedToUser = user ? assignees.includes(user.name) : false;
-
+  const isCreatedByUser = user ? task.created_by === user.user_id : false;
   return (
     <Card className={`mb-3 task-card ${isExpanded ? 'expanded' : ''}`} onClick={handleCardClick} ref={cardRef}>
       {!isExpanded && (
@@ -139,7 +139,7 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
                 {/* Dropdown Toggle Content */}
               </Dropdown.Toggle>
               <Dropdown.Menu>
-                {isAssignedToUser && (
+              {isCreatedByUser && (
                   <>
                     <Dropdown.Item onClick={handleDelete} className="task-card-delete-button">
                       <Trash /> Delete
