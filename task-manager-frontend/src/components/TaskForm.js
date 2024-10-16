@@ -167,7 +167,8 @@ const TaskForm = ({ addTask, role }) => {
 
 TaskForm.propTypes = {
     addTask: PropTypes.func.isRequired,
-    role: PropTypes.string.isRequired
+    role: PropTypes.string.isRequired,
+    user: PropTypes.object.isRequired
 };
 
 export default TaskForm;

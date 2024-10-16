@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import axios from 'axios';
-import { Card, Button, Form, Dropdown, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { Trash, EyeSlash } from 'react-bootstrap-icons';
+import { Card, Button, Dropdown, Form, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { EyeSlash, Trash } from 'react-bootstrap-icons';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './TaskCard.css';
@@ -12,9 +12,26 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
   const [showMenu, setShowMenu] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [targetDate, setTargetDate] = useState(new Date(task.target_date));
-  const [hasInteracted, setHasInteracted] = useState(task.hasInteracted); // Track user interaction
+  const [hasInteracted, setHasInteracted] = useState(false); // Track user interaction
   const cardRef = useRef(null);
   const datePickerWrapperRef = useRef(null);
+
+  useEffect(() => {
+    const fetchInteractions = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/api/tasks/interactions/${task.task_id}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+        });
+        const interactions = response.data;
+        const hasInteracted = interactions.some(interaction => interaction.user_id === user.user_id);
+        setHasInteracted(hasInteracted);
+      } catch (error) {
+        console.error('Error fetching interactions:', error);
+      }
+    };
+
+    fetchInteractions();
+  }, [task.task_id, user.user_id]);
 
   useEffect(() => {
     if (isExpanded) {
@@ -45,12 +62,10 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
   const handleTargetDateChange = async (date) => {
     setTargetDate(date);
     try {
-      const response = await axios.put(`${API_BASE_URL}/api/tasks/${task.task_id}/target-date`, { target_date: date.toISOString().split('T')[0] }, {
+      await axios.put(`${API_BASE_URL}/api/tasks/${task.task_id}/target-date`, { target_date: date.toISOString().split('T')[0] }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
       });
-      console.log('Target date update response:', response.data); // Log the response
       logInteraction('target_date_change', date.toISOString().split('T')[0]);
-      setHasInteracted(true); // Mark as interacted
     } catch (error) {
       console.error('There was an error updating the task target date!', error);
     }
@@ -65,6 +80,7 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
       }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
       });
+      setHasInteracted(true); // Mark as interacted
     } catch (error) {
       console.error('Error logging interaction:', error);
     }
@@ -98,7 +114,6 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
     }
     onExpand();
     logInteraction('expand', 'Task expanded');
-    setHasInteracted(true); // Mark as interacted
   };
 
   const isAssignedToUser = user ? assignees.includes(user.name) : false;
@@ -189,4 +204,4 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
   );
 };
 
-export default TaskCard;
+export default memo(TaskCard);

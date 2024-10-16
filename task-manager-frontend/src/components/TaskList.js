@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import TaskCard from './TaskCard';
+import { DndProvider } from 'react-dnd';
+import { useDrag, useDrop } from 'react-dnd';
 import { Badge, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { DndProvider, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
 import { Eye, Funnel } from 'react-bootstrap-icons';
+import './TaskList.css';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import axios from 'axios';
-import './TaskList.css'; // Import the CSS file
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
@@ -30,12 +31,12 @@ const TaskList = ({ tasks, onDelete, onStatusChange, user, canDragAndDrop }) => 
     setTaskList(sortedTasks);
   }, [tasks]);
 
-  const handleStatusChange = (taskId, newStatus) => {
-    setTaskList(taskList.map(task => task.task_id === taskId ? { ...task, status: newStatus, hasInteracted: true } : task));
+  const handleStatusChange = useCallback((taskId, newStatus) => {
+    setTaskList(taskList => taskList.map(task => task.task_id === taskId ? { ...task, status: newStatus, hasInteracted: true } : task));
     onStatusChange(taskId, newStatus);
-  };
+  }, [onStatusChange]);
 
-  const handleExpand = (taskId, status) => {
+  const handleExpand = useCallback((taskId, status) => {
     if (status === 'pending') {
       setExpandedPendingTaskId(expandedPendingTaskId === taskId ? null : taskId);
     } else if (status === 'in progress') {
@@ -43,25 +44,25 @@ const TaskList = ({ tasks, onDelete, onStatusChange, user, canDragAndDrop }) => 
     } else if (status === 'completed') {
       setExpandedCompletedTaskId(expandedCompletedTaskId === taskId ? null : taskId);
     }
-    setTaskList(taskList.map(task => task.task_id === taskId ? { ...task, hasInteracted: true } : task));
-  };
+    setTaskList(taskList => taskList.map(task => task.task_id === taskId ? { ...task, hasInteracted: true } : task));
+  }, [expandedPendingTaskId, expandedInProgressTaskId, expandedCompletedTaskId]);
 
-  const moveTask = (taskId, newStatus) => {
+  const moveTask = useCallback((taskId, newStatus) => {
     handleStatusChange(taskId, newStatus);
     logInteraction(taskId, 'status_change', newStatus);
-  };
+  }, [handleStatusChange]);
 
-  const handleHideTask = (taskId, status) => {
+  const handleHideTask = useCallback((taskId, status) => {
     if (status === 'pending') {
-      setHiddenPendingTasks([...hiddenPendingTasks, taskId]);
+      setHiddenPendingTasks(hiddenPendingTasks => [...hiddenPendingTasks, taskId]);
     } else if (status === 'in progress') {
-      setHiddenInProgressTasks([...hiddenInProgressTasks, taskId]);
+      setHiddenInProgressTasks(hiddenInProgressTasks => [...hiddenInProgressTasks, taskId]);
     } else if (status === 'completed') {
-      setHiddenCompletedTasks([...hiddenCompletedTasks, taskId]);
+      setHiddenCompletedTasks(hiddenCompletedTasks => [...hiddenCompletedTasks, taskId]);
     }
-  };
+  }, []);
 
-  const handleUnhideAllTasks = (status) => {
+  const handleUnhideAllTasks = useCallback((status) => {
     if (status === 'pending') {
       setHiddenPendingTasks([]);
     } else if (status === 'in progress') {
@@ -69,7 +70,7 @@ const TaskList = ({ tasks, onDelete, onStatusChange, user, canDragAndDrop }) => 
     } else if (status === 'completed') {
       setHiddenCompletedTasks([]);
     }
-  };
+  }, []);
 
   const logInteraction = async (taskId, interactionType, interactionDetail) => {
     try {
