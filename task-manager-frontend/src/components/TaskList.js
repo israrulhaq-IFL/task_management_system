@@ -3,7 +3,7 @@ import TaskCard from './TaskCard';
 import { Badge, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { Eye } from 'react-bootstrap-icons';
+import { Eye, Funnel } from 'react-bootstrap-icons';
 import axios from 'axios';
 import './TaskList.css'; // Import the CSS file
 
@@ -21,6 +21,7 @@ const TaskList = ({ tasks, onDelete, onStatusChange, user, canDragAndDrop }) => 
   const [expandedPendingTaskId, setExpandedPendingTaskId] = useState(null);
   const [expandedInProgressTaskId, setExpandedInProgressTaskId] = useState(null);
   const [expandedCompletedTaskId, setExpandedCompletedTaskId] = useState(null);
+  const [filterAssignedByMe, setFilterAssignedByMe] = useState(false); // Filter state
 
   useEffect(() => {
     console.log('TaskList received tasks:', tasks); // Log the received tasks
@@ -129,13 +130,24 @@ const TaskList = ({ tasks, onDelete, onStatusChange, user, canDragAndDrop }) => 
     );
   };
 
-  const pendingTasks = taskList.filter(task => task.status === 'pending' && !hiddenPendingTasks.includes(task.task_id));
-  const inProgressTasks = taskList.filter(task => task.status === 'in progress' && !hiddenInProgressTasks.includes(task.task_id));
-  const completedTasks = taskList.filter(task => task.status === 'completed' && !hiddenCompletedTasks.includes(task.task_id));
+  const filteredTasks = filterAssignedByMe
+    ? taskList.filter(task => task.created_by === user.user_id)
+    : taskList;
+
+  const pendingTasks = filteredTasks.filter(task => task.status === 'pending' && !hiddenPendingTasks.includes(task.task_id));
+  const inProgressTasks = filteredTasks.filter(task => task.status === 'in progress' && !hiddenInProgressTasks.includes(task.task_id));
+  const completedTasks = filteredTasks.filter(task => task.status === 'completed' && !hiddenCompletedTasks.includes(task.task_id));
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="task-list-container">
+        <div className="task-list-header">
+          <OverlayTrigger placement="top" overlay={<Tooltip>Filter Assigned by Me</Tooltip>}>
+            <Button variant="link" onClick={() => setFilterAssignedByMe(!filterAssignedByMe)}>
+              <Funnel />
+            </Button>
+          </OverlayTrigger>
+        </div>
         <Column status="pending">
           {pendingTasks.map((task, index) => (
             <Task key={task.task_id} task={task} index={index} status="pending" />
