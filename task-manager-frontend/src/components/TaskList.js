@@ -31,7 +31,7 @@ const TaskList = ({ tasks, onDelete, onStatusChange, user, canDragAndDrop }) => 
   }, [tasks]);
 
   const handleStatusChange = (taskId, newStatus) => {
-    setTaskList(taskList.map(task => task.task_id === taskId ? { ...task, status: newStatus } : task));
+    setTaskList(taskList.map(task => task.task_id === taskId ? { ...task, status: newStatus, hasInteracted: true } : task));
     onStatusChange(taskId, newStatus);
   };
 
@@ -43,6 +43,7 @@ const TaskList = ({ tasks, onDelete, onStatusChange, user, canDragAndDrop }) => 
     } else if (status === 'completed') {
       setExpandedCompletedTaskId(expandedCompletedTaskId === taskId ? null : taskId);
     }
+    setTaskList(taskList.map(task => task.task_id === taskId ? { ...task, hasInteracted: true } : task));
   };
 
   const moveTask = (taskId, newStatus) => {

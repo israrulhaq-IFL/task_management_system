@@ -12,6 +12,7 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
   const [showMenu, setShowMenu] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [targetDate, setTargetDate] = useState(new Date(task.target_date));
+  const [hasInteracted, setHasInteracted] = useState(task.hasInteracted); // Track user interaction
   const cardRef = useRef(null);
   const datePickerWrapperRef = useRef(null);
 
@@ -30,6 +31,7 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
       });
       onStatusChange(task.task_id, newStatus);
       logInteraction('status_change', newStatus);
+      setHasInteracted(true); // Mark as interacted
     } catch (error) {
       console.error('There was an error updating the task status!', error);
     }
@@ -48,6 +50,7 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
       });
       console.log('Target date update response:', response.data); // Log the response
       logInteraction('target_date_change', date.toISOString().split('T')[0]);
+      setHasInteracted(true); // Mark as interacted
     } catch (error) {
       console.error('There was an error updating the task target date!', error);
     }
@@ -95,10 +98,12 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
     }
     onExpand();
     logInteraction('expand', 'Task expanded');
+    setHasInteracted(true); // Mark as interacted
   };
 
   const isAssignedToUser = user ? assignees.includes(user.name) : false;
   const isCreatedByUser = user ? task.created_by === user.user_id : false;
+
   return (
     <Card className={`mb-3 task-card ${isExpanded ? 'expanded' : ''}`} onClick={handleCardClick} ref={cardRef}>
       {!isExpanded && (
@@ -108,9 +113,10 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
           </Button>
         </OverlayTrigger>
       )}
+      {!hasInteracted && <div className="status-dot blue"></div>} {/* Show dot if not interacted */}
       <Card.Body>
         <Card.Text>
-          <strong></strong> {new Date(task.created_at).toLocaleString()}
+          <strong>Created At:</strong> {new Date(task.created_at).toLocaleString()}
         </Card.Text>
         <Card.Title className="task-card-title">{task.title || 'Untitled Task'}</Card.Title>
         <Card.Text className="task-card-description" dangerouslySetInnerHTML={{ __html: task.description }}></Card.Text>
@@ -136,10 +142,10 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
             </div>
             <Dropdown onToggle={() => setShowMenu(!showMenu)} show={showMenu} className="task-card-dropdown">
               <Dropdown.Toggle variant="link" id="dropdown-basic" className="task-card-dropdown-toggle">
-                {/* Dropdown Toggle Content */}
+                ⋮
               </Dropdown.Toggle>
               <Dropdown.Menu>
-              {isCreatedByUser && (
+                {isCreatedByUser && (
                   <>
                     <Dropdown.Item onClick={handleDelete} className="task-card-delete-button">
                       <Trash /> Delete

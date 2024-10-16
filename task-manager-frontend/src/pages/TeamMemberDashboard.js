@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import TaskList from '../components/TaskList';
-import { Alert, Tabs, Tab, Button, Modal } from 'react-bootstrap';
+import { Alert, Tabs, Tab, Button, Modal, Container } from 'react-bootstrap';
 import TaskForm from '../components/TaskForm';
+import './Dashboard.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
@@ -88,11 +89,13 @@ const TeamMemberDashboard = ({ user }) => {
   };
 
   return (
-    <div>
-      <h2>Team Member Dashboard</h2>
-      <Button variant="primary" onClick={() => setShowForm(true)}>Add Task</Button>
-      {error && <Alert variant="danger">{error}</Alert>}
-      <Tabs defaultActiveKey="my-tasks" id="task-tabs">
+    <Container className="dashboard-container">
+      <div className="dashboard-header">
+        <h2>Team Member Dashboard</h2>
+        <Button variant="primary" onClick={() => setShowForm(true)}>Add Task</Button>
+      </div>
+      {error && <Alert variant="danger" className="dashboard-alert">{error}</Alert>}
+      <Tabs defaultActiveKey="my-tasks" id="task-tabs" className="dashboard-tabs">
         <Tab eventKey="my-tasks" title="My Tasks">
           <TaskList tasks={tasksAssignedToMe} onDelete={handleDelete} onStatusChange={handleStatusChange} user={user} canDragAndDrop={true} />
         </Tab>
@@ -100,7 +103,7 @@ const TeamMemberDashboard = ({ user }) => {
           <TaskList tasks={tasksAssignedToOthers} onDelete={handleDelete} onStatusChange={handleStatusChange} user={user} canDragAndDrop={false} />
         </Tab>
       </Tabs>
-      <Modal show={showForm} onHide={() => setShowForm(false)}>
+      <Modal show={showForm} onHide={() => setShowForm(false)} className="dashboard-modal">
         <Modal.Header closeButton>
           <Modal.Title>Add Task</Modal.Title>
         </Modal.Header>
@@ -108,7 +111,7 @@ const TeamMemberDashboard = ({ user }) => {
           <TaskForm addTask={addTask} role={role} user={user} />
         </Modal.Body>
       </Modal>
-    </div>
+    </Container>
   );
 };
 

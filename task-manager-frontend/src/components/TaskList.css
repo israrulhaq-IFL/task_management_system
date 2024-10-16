@@ -1,21 +1,17 @@
 .task-list-container {
   display: flex;
   justify-content: center;
-
   align-items: flex-start; /* Align items to the top */
-  height: 100vh; /* Full viewport height */
   padding: 30px; /* Optional: Add padding around the container */
+  width: 100%;
 }
 
 .task-list-box {
   display: flex;
-  flex-direction: row;
-  
-  max-height: 100%; /* Use full height of the container */
+  flex-direction: column;
   width: 100%; /* Use full width of the container */
   padding: 10px; /* Optional: Add padding inside the box */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Add a shadow for better visibility */
-
 }
 
 .task-column {
@@ -25,14 +21,13 @@
   border-radius: 8px;
   padding: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  
 }
 
 .task-column-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  min-width: 250px; /* Minimum width of the box */
+  min-width: 350px; /* Minimum width of the box */
 }
 
 .task-column h3 {

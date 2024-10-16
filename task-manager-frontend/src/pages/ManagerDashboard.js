@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import TaskList from '../components/TaskList';
-import { Button, Modal, Alert, Tabs, Tab } from 'react-bootstrap';
+import { Button, Modal, Alert, Tabs, Tab, Container,} from 'react-bootstrap';
 import TaskForm from '../components/TaskForm';
 import axios from 'axios';
+import './Dashboard.css';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
@@ -124,13 +125,13 @@ const ManagerDashboard = () => {
   };
 
   return (
-    <div>
-      <h2>Manager Dashboard</h2>
-      <div className="text-center mb-4">
+    <Container className="dashboard-container">
+      <div className="dashboard-header">
+        <h2>Manager Dashboard</h2>
         <Button variant="primary" onClick={() => setShowForm(true)}>Add Task</Button>
       </div>
-      {error && <Alert variant="danger">{error}</Alert>}
-      <Tabs defaultActiveKey="my-tasks" id="task-tabs">
+      {error && <Alert variant="danger" className="dashboard-alert">{error}</Alert>}
+      <Tabs defaultActiveKey="my-tasks" id="task-tabs" className="dashboard-tabs">
         <Tab eventKey="my-tasks" title="My Tasks">
           <TaskList tasks={tasksAssignedToMe} onDelete={handleDelete} onStatusChange={handleStatusChange} user={user} canDragAndDrop={true} />
         </Tab>
@@ -138,7 +139,7 @@ const ManagerDashboard = () => {
           <TaskList tasks={tasksAssignedToTeam} onDelete={handleDelete} onStatusChange={handleStatusChange} user={user} canDragAndDrop={false} />
         </Tab>
       </Tabs>
-      <Modal show={showForm} onHide={() => setShowForm(false)}>
+      <Modal show={showForm} onHide={() => setShowForm(false)} className="dashboard-modal">
         <Modal.Header closeButton>
           <Modal.Title>Add Task</Modal.Title>
         </Modal.Header>
@@ -146,7 +147,7 @@ const ManagerDashboard = () => {
           <TaskForm addTask={addTask} role={role} />
         </Modal.Body>
       </Modal>
-    </div>
+    </Container>
   );
 };
 
