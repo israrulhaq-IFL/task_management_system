@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import TaskList from '../components/TaskList';
-import { Alert, Tabs, Tab } from 'react-bootstrap';
+import { Alert, Tabs, Tab, Button, Modal } from 'react-bootstrap';
+import TaskForm from '../components/TaskForm';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
@@ -9,6 +10,8 @@ const TeamMemberDashboard = ({ user }) => {
   const [tasksAssignedToOthers, setTasksAssignedToOthers] = useState([]);
   const [tasksAssignedToMe, setTasksAssignedToMe] = useState([]);
   const [error, setError] = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const role = 'Team Member'; // Set role to 'Team Member'
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -67,9 +70,27 @@ const TeamMemberDashboard = ({ user }) => {
     }
   };
 
+  const addTask = async (task) => {
+    try {
+      const token = localStorage.getItem('accessToken'); // Correctly fetch the accessToken from localStorage
+      const response = await axios.post(`${API_BASE_URL}/api/tasks`, task, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setTasksAssignedToMe([...tasksAssignedToMe, response.data]);
+      setShowForm(false);
+    } catch (error) {
+      console.error('There was an error adding the task!', error);
+      if (error.response) {
+        console.error('Error response:', error.response.data);
+        setError(error.response.data.error);
+      }
+    }
+  };
+
   return (
     <div>
       <h2>Team Member Dashboard</h2>
+      <Button variant="primary" onClick={() => setShowForm(true)}>Add Task</Button>
       {error && <Alert variant="danger">{error}</Alert>}
       <Tabs defaultActiveKey="my-tasks" id="task-tabs">
         <Tab eventKey="my-tasks" title="My Tasks">
@@ -79,6 +100,14 @@ const TeamMemberDashboard = ({ user }) => {
           <TaskList tasks={tasksAssignedToOthers} onDelete={handleDelete} onStatusChange={handleStatusChange} user={user} canDragAndDrop={false} />
         </Tab>
       </Tabs>
+      <Modal show={showForm} onHide={() => setShowForm(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Add Task</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <TaskForm addTask={addTask} role={role} user={user} />
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };
