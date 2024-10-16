@@ -23,8 +23,7 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
     }
   }, [isExpanded]);
 
-  const handleStatusChange = async (event) => {
-    const newStatus = event.target.value;
+  const handleStatusChange = async (newStatus) => {
     try {
       await axios.put(`${API_BASE_URL}/api/tasks/${task.task_id}/status`, { status: newStatus }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
@@ -34,6 +33,11 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
     } catch (error) {
       console.error('There was an error updating the task status!', error);
     }
+  };
+
+  const handleStatusDropdownChange = (event) => {
+    const newStatus = event.target.value;
+    handleStatusChange(newStatus);
   };
 
   const handleTargetDateChange = async (date) => {
@@ -150,7 +154,7 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
               </Dropdown.Menu>
             </Dropdown>
             {isAssignedToUser && (
-              <Form.Control as="select" value={task.status} onChange={handleStatusChange} className="mt-2 task-card-status-dropdown">
+              <Form.Control as="select" value={task.status} onChange={handleStatusDropdownChange} className="mt-2 task-card-status-dropdown">
                 <option value="pending">Pending</option>
                 <option value="in progress">In Progress</option>
                 <option value="completed">Completed</option>

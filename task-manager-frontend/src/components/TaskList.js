@@ -4,7 +4,10 @@ import { Badge, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { Eye } from 'react-bootstrap-icons';
+import axios from 'axios';
 import './TaskList.css'; // Import the CSS file
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
 
 const ItemTypes = {
   TASK: 'task',
@@ -43,6 +46,7 @@ const TaskList = ({ tasks, onDelete, onStatusChange, user, canDragAndDrop }) => 
 
   const moveTask = (taskId, newStatus) => {
     handleStatusChange(taskId, newStatus);
+    logInteraction(taskId, 'status_change', newStatus);
   };
 
   const handleHideTask = (taskId, status) => {
@@ -62,6 +66,20 @@ const TaskList = ({ tasks, onDelete, onStatusChange, user, canDragAndDrop }) => 
       setHiddenInProgressTasks([]);
     } else if (status === 'completed') {
       setHiddenCompletedTasks([]);
+    }
+  };
+
+  const logInteraction = async (taskId, interactionType, interactionDetail) => {
+    try {
+      await axios.post(`${API_BASE_URL}/api/tasks/interactions`, {
+        taskId,
+        interactionType,
+        interactionDetail
+      }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+      });
+    } catch (error) {
+      console.error('Error logging interaction:', error);
     }
   };
 
