@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef, memo } from 'react';
+import React, { useState, useEffect, useRef, memo, useCallback } from 'react';
 import axios from 'axios';
-import { Card, Button, Dropdown, Form, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { EyeSlash, Trash } from 'react-bootstrap-icons';
+import { Card, Button, Form, Dropdown, Modal, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Trash, EyeSlash } from 'react-bootstrap-icons';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './TaskCard.css';
@@ -41,37 +41,7 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
     }
   }, [isExpanded]);
 
-  const handleStatusChange = async (newStatus) => {
-    try {
-      await axios.put(`${API_BASE_URL}/api/tasks/${task.task_id}/status`, { status: newStatus }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
-      });
-      onStatusChange(task.task_id, newStatus);
-      logInteraction('status_change', newStatus);
-      setHasInteracted(true); // Mark as interacted
-    } catch (error) {
-      console.error('There was an error updating the task status!', error);
-    }
-  };
-
-  const handleStatusDropdownChange = (event) => {
-    const newStatus = event.target.value;
-    handleStatusChange(newStatus);
-  };
-
-  const handleTargetDateChange = async (date) => {
-    setTargetDate(date);
-    try {
-      await axios.put(`${API_BASE_URL}/api/tasks/${task.task_id}/target-date`, { target_date: date.toISOString().split('T')[0] }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
-      });
-      logInteraction('target_date_change', date.toISOString().split('T')[0]);
-    } catch (error) {
-      console.error('There was an error updating the task target date!', error);
-    }
-  };
-
-  const logInteraction = async (interactionType, interactionDetail) => {
+  const logInteraction = useCallback(async (interactionType, interactionDetail) => {
     try {
       await axios.post(`${API_BASE_URL}/api/tasks/interactions`, {
         taskId: task.task_id,
@@ -84,27 +54,57 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
     } catch (error) {
       console.error('Error logging interaction:', error);
     }
-  };
+  }, [task.task_id]);
+
+  const handleStatusChange = useCallback(async (newStatus) => {
+    try {
+      await axios.put(`${API_BASE_URL}/api/tasks/${task.task_id}/status`, { status: newStatus }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+      });
+      onStatusChange(task.task_id, newStatus);
+      logInteraction('status_change', newStatus);
+      setHasInteracted(true); // Mark as interacted
+    } catch (error) {
+      console.error('There was an error updating the task status!', error);
+    }
+  }, [task.task_id, onStatusChange, logInteraction]);
+
+  const handleStatusDropdownChange = useCallback((event) => {
+    const newStatus = event.target.value;
+    handleStatusChange(newStatus);
+  }, [handleStatusChange]);
+
+  const handleTargetDateChange = useCallback(async (date) => {
+    setTargetDate(date);
+    try {
+      await axios.put(`${API_BASE_URL}/api/tasks/${task.task_id}/target-date`, { target_date: date.toISOString().split('T')[0] }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+      });
+      logInteraction('target_date_change', date.toISOString().split('T')[0]);
+    } catch (error) {
+      console.error('There was an error updating the task target date!', error);
+    }
+  }, [task.task_id, logInteraction]);
 
   const assignees = task.assignees ? task.assignees.split(',') : [];
   const subDepartments = task.sub_departments ? task.sub_departments.split(',') : [];
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     setShowModal(true);
-  };
+  }, []);
 
-  const confirmDelete = () => {
+  const confirmDelete = useCallback(() => {
     onDelete(task.task_id);
     setShowModal(false);
     logInteraction('delete', 'Task deleted');
-  };
+  }, [onDelete, task.task_id, logInteraction]);
 
-  const handleHide = () => {
+  const handleHide = useCallback(() => {
     onHide(task.task_id);
     logInteraction('hide', 'Task hidden');
-  };
+  }, [onHide, task.task_id, logInteraction]);
 
-  const handleCardClick = (e) => {
+  const handleCardClick = useCallback((e) => {
     if (
       e.target.closest('.task-card-dropdown') ||
       e.target.closest('.task-card-status-dropdown') ||
@@ -114,7 +114,7 @@ const TaskCard = ({ task, onDelete, onStatusChange, isExpanded, onExpand, onHide
     }
     onExpand();
     logInteraction('expand', 'Task expanded');
-  };
+  }, [onExpand, logInteraction]);
 
   const isAssignedToUser = user ? assignees.includes(user.name) : false;
   const isCreatedByUser = user ? task.created_by === user.user_id : false;

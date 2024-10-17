@@ -1,14 +1,10 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import TaskCard from './TaskCard';
-import { DndProvider } from 'react-dnd';
-import { useDrag, useDrop } from 'react-dnd';
 import { Badge, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { Eye, Funnel } from 'react-bootstrap-icons';
-import './TaskList.css';
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import axios from 'axios';
-
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001';
+import { Eye } from 'react-bootstrap-icons';
+import './TaskList.css'; // Import the CSS file
 
 const ItemTypes = {
   TASK: 'task',
@@ -22,7 +18,6 @@ const TaskList = ({ tasks, onDelete, onStatusChange, user, canDragAndDrop }) => 
   const [expandedPendingTaskId, setExpandedPendingTaskId] = useState(null);
   const [expandedInProgressTaskId, setExpandedInProgressTaskId] = useState(null);
   const [expandedCompletedTaskId, setExpandedCompletedTaskId] = useState(null);
-  const [filterAssignedByMe, setFilterAssignedByMe] = useState(false); // Filter state
 
   useEffect(() => {
     console.log('TaskList received tasks:', tasks); // Log the received tasks
@@ -31,12 +26,12 @@ const TaskList = ({ tasks, onDelete, onStatusChange, user, canDragAndDrop }) => 
     setTaskList(sortedTasks);
   }, [tasks]);
 
-  const handleStatusChange = useCallback((taskId, newStatus) => {
-    setTaskList(taskList => taskList.map(task => task.task_id === taskId ? { ...task, status: newStatus, hasInteracted: true } : task));
+  const handleStatusChange = (taskId, newStatus) => {
+    setTaskList(taskList.map(task => task.task_id === taskId ? { ...task, status: newStatus } : task));
     onStatusChange(taskId, newStatus);
-  }, [onStatusChange]);
+  };
 
-  const handleExpand = useCallback((taskId, status) => {
+  const handleExpand = (taskId, status) => {
     if (status === 'pending') {
       setExpandedPendingTaskId(expandedPendingTaskId === taskId ? null : taskId);
     } else if (status === 'in progress') {
@@ -44,45 +39,29 @@ const TaskList = ({ tasks, onDelete, onStatusChange, user, canDragAndDrop }) => 
     } else if (status === 'completed') {
       setExpandedCompletedTaskId(expandedCompletedTaskId === taskId ? null : taskId);
     }
-    setTaskList(taskList => taskList.map(task => task.task_id === taskId ? { ...task, hasInteracted: true } : task));
-  }, [expandedPendingTaskId, expandedInProgressTaskId, expandedCompletedTaskId]);
+  };
 
-  const moveTask = useCallback((taskId, newStatus) => {
+  const moveTask = (taskId, newStatus) => {
     handleStatusChange(taskId, newStatus);
-    logInteraction(taskId, 'status_change', newStatus);
-  }, [handleStatusChange]);
+  };
 
-  const handleHideTask = useCallback((taskId, status) => {
+  const handleHideTask = (taskId, status) => {
     if (status === 'pending') {
-      setHiddenPendingTasks(hiddenPendingTasks => [...hiddenPendingTasks, taskId]);
+      setHiddenPendingTasks([...hiddenPendingTasks, taskId]);
     } else if (status === 'in progress') {
-      setHiddenInProgressTasks(hiddenInProgressTasks => [...hiddenInProgressTasks, taskId]);
+      setHiddenInProgressTasks([...hiddenInProgressTasks, taskId]);
     } else if (status === 'completed') {
-      setHiddenCompletedTasks(hiddenCompletedTasks => [...hiddenCompletedTasks, taskId]);
+      setHiddenCompletedTasks([...hiddenCompletedTasks, taskId]);
     }
-  }, []);
+  };
 
-  const handleUnhideAllTasks = useCallback((status) => {
+  const handleUnhideAllTasks = (status) => {
     if (status === 'pending') {
       setHiddenPendingTasks([]);
     } else if (status === 'in progress') {
       setHiddenInProgressTasks([]);
     } else if (status === 'completed') {
       setHiddenCompletedTasks([]);
-    }
-  }, []);
-
-  const logInteraction = async (taskId, interactionType, interactionDetail) => {
-    try {
-      await axios.post(`${API_BASE_URL}/api/tasks/interactions`, {
-        taskId,
-        interactionType,
-        interactionDetail
-      }, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
-      });
-    } catch (error) {
-      console.error('Error logging interaction:', error);
     }
   };
 
@@ -132,24 +111,13 @@ const TaskList = ({ tasks, onDelete, onStatusChange, user, canDragAndDrop }) => 
     );
   };
 
-  const filteredTasks = filterAssignedByMe
-    ? taskList.filter(task => task.created_by === user.user_id)
-    : taskList;
-
-  const pendingTasks = filteredTasks.filter(task => task.status === 'pending' && !hiddenPendingTasks.includes(task.task_id));
-  const inProgressTasks = filteredTasks.filter(task => task.status === 'in progress' && !hiddenInProgressTasks.includes(task.task_id));
-  const completedTasks = filteredTasks.filter(task => task.status === 'completed' && !hiddenCompletedTasks.includes(task.task_id));
+  const pendingTasks = taskList.filter(task => task.status === 'pending' && !hiddenPendingTasks.includes(task.task_id));
+  const inProgressTasks = taskList.filter(task => task.status === 'in progress' && !hiddenInProgressTasks.includes(task.task_id));
+  const completedTasks = taskList.filter(task => task.status === 'completed' && !hiddenCompletedTasks.includes(task.task_id));
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="task-list-container">
-        <div className="task-list-header">
-          <OverlayTrigger placement="top" overlay={<Tooltip>Filter Assigned by Me</Tooltip>}>
-            <Button variant="link" onClick={() => setFilterAssignedByMe(!filterAssignedByMe)}>
-              <Funnel />
-            </Button>
-          </OverlayTrigger>
-        </div>
         <Column status="pending">
           {pendingTasks.map((task, index) => (
             <Task key={task.task_id} task={task} index={index} status="pending" />
